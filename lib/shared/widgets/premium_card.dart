@@ -31,61 +31,20 @@ class PremiumCard
 
     return Material(
 
-      color:
-          Colors.transparent,
+      color: color ?? Colors.white,
+      borderRadius: BorderRadius.circular(22),
+      elevation: 3,
+      shadowColor: Colors.black.withValues(alpha: 0.05),
 
       child: InkWell(
-
-        borderRadius:
-            BorderRadius.circular(
-          22,
-        ),
-
+        borderRadius: BorderRadius.circular(22),
         onTap: onTap,
-
         child: Container(
-
-          padding:
-              padding ??
-              const EdgeInsets.all(
-                20,
-              ),
-
-          decoration:
-              BoxDecoration(
-
-            color:
-                color ??
-                Colors.white,
-
-            borderRadius:
-                BorderRadius.circular(
-              22,
-            ),
-
-            boxShadow: [
-
-              BoxShadow(
-
-                color: Colors.black
-                    .withValues(
-                  alpha: 0.05,
-                ),
-
-                blurRadius: 14,
-
-                offset:
-                    const Offset(
-                  0,
-                  4,
-                ),
-              ),
-            ],
-          ),
-
+          padding: padding ?? const EdgeInsets.all(20),
           child: child,
         ),
       ),
     );
   }
 }
+      

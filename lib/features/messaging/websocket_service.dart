@@ -58,6 +58,7 @@ class MessagingWebSocketService {
 
         print("========== WS CLOSED ==========");
         
+      },
     );
   }
 

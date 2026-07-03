@@ -1,7 +1,7 @@
-import '../../core/api/api_client.dart';
-import 'dart:io';
-
 import 'package:dio/dio.dart';
+import '../../core/api/api_client.dart';
+import '../messaging/models/attachment_model.dart';
+
 
 class MessagingService {
 
@@ -37,7 +37,8 @@ class MessagingService {
   required String conversationId,
 
   required String body,
-  File? attachment,
+
+  AttachmentModel? attachment,
 
 }) async {
 
@@ -46,10 +47,7 @@ class MessagingService {
     "body":body,
   
   if(attachment != null) 
-    "attachment":
-    await MultipartFile.fromFile(
-      attachment.path,
-    ),
+    "attachment": await attachment.toMultipart(),
 });
   await ApiClient.dio.post(
 

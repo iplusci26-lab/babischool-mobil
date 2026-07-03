@@ -38,7 +38,7 @@ class _FinanceTabState
   bool loading = true;
 
   Future<void> loadData() async {
-
+    print("Load data fiance ==== ");
     try {
 
       summary =
@@ -48,9 +48,10 @@ class _FinanceTabState
 
         widget.studentId,
       );
+      print("Load data summary ==== $summary");
 
     } finally {
-
+      print("Load data summary 2 ==== $summary");
       if (mounted) {
 
         setState(() {

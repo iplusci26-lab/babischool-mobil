@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import '../models/attachment_model.dart';
 
 class AttachmentPreview
 extends StatelessWidget {
 
-  final File file;
+  final AttachmentModel  attachment;
 
   final VoidCallback onRemove;
 
@@ -13,24 +12,12 @@ extends StatelessWidget {
 
     super.key,
 
-    required this.file,
+    required this.attachment,
 
     required this.onRemove,
   });
 
-  bool get isImage {
-
-    final path =
-    file.path.toLowerCase();
-
-    return
-
-    path.endsWith(".png") ||
-
-    path.endsWith(".jpg") ||
-
-    path.endsWith(".jpeg");
-  }
+  
 
   @override
   Widget build(
@@ -39,15 +26,14 @@ extends StatelessWidget {
 
     return Container(
 
-      margin:
-      const EdgeInsets.only(
+      margin: const EdgeInsets.only(
 
-        bottom: 10,
+        bottom: 12,
       ),
 
       padding:
       const EdgeInsets.all(
-        10,
+        12,
       ),
 
       decoration:
@@ -66,24 +52,21 @@ extends StatelessWidget {
 
         children: [
 
-          if (isImage)
+          if (attachment.isImage)
 
             ClipRRect(
 
               borderRadius:
 
               BorderRadius.circular(
-                10,
+                12,
               ),
 
-              child: Image.file(
+              child: Image.memory(
 
-                file,
-
+                attachment.bytes,
                 width: 60,
-
                 height: 60,
-
                 fit: BoxFit.cover,
               ),
             )
@@ -92,9 +75,9 @@ extends StatelessWidget {
 
             const Icon(
 
-              Icons.picture_as_pdf,
+              Icons.insert_drive_file,
 
-              size: 50,
+              size: 42,
 
               color: Colors.red,
             ),
@@ -103,17 +86,28 @@ extends StatelessWidget {
             width: 12,
           ),
 
-          Expanded(
+          Column(
 
-            child: Text(
+            crossAxisAlignment: CrossAxisAlignment.start,
 
-              file.path
-                  .split("/")
-                  .last,
+            children: [
 
-              overflow:
-              TextOverflow.ellipsis,
-            ),
+              Text(
+                attachment.name,
+              ),
+
+              Text(
+
+                attachment.formattedSize,
+
+                style: TextStyle(
+
+                  color: Colors.grey,
+
+                  fontSize: 12,
+                ),
+              ),
+            ],
           ),
 
           IconButton(

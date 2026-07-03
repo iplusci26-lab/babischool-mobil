@@ -35,17 +35,16 @@ class PaymentService {
 }
 
 Future<FinanceSummaryModel>
-getStudentFinanceSummary(
-    String studentId,
-) async {
-
+getStudentFinanceSummary(String studentId,) 
+async {
+    print("Fiance summary $studentId");
     final response =
 
         await ApiClient.dio.get(
 
       "/mobile/students/$studentId/finance/",
     );
-
+    print("response $response.data");
     return FinanceSummaryModel.fromJson(
       response.data,
     );

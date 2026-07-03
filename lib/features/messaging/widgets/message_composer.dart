@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
-
+import '../models/attachment_model.dart';
 import 'attachment_preview.dart';
 
 class MessageComposer
@@ -12,7 +10,7 @@ extends StatelessWidget {
   final TextEditingController
   controller;
 
-  final File? attachment;
+  final AttachmentModel? attachment;
 
   final VoidCallback onGallery;
 
@@ -90,11 +88,8 @@ extends StatelessWidget {
 
               AttachmentPreview(
 
-                file:
-                attachment!,
-
-                onRemove:
-                onRemoveAttachment,
+                attachment: attachment!,
+                onRemove: onRemoveAttachment,
               ),
 
             Row(

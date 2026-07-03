@@ -1,6 +1,8 @@
-import 'dart:io';
-
+import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
+import '../messaging/models/attachment_model.dart';
+
+import '../messaging/widgets/attachment_preview.dart';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -45,8 +47,8 @@ class _ConversationScreenState
   String? error;
 
   
-
-  File? selectedAttachment;
+  AttachmentModel? attachment;
+  //File? selectedAttachment;
 
   final messageController =
       TextEditingController();
@@ -57,11 +59,42 @@ class _ConversationScreenState
   final MessagingWebSocketService
       webSocketService =
       MessagingWebSocketService();
+  
+  final MessagingService messagingService =
+    MessagingService();
 
   final ImagePicker imagePicker =
       ImagePicker();
 
+AttachmentModel createAttachment({
 
+  required String name,
+
+  required Uint8List bytes,
+
+  required String mimeType,
+
+  required int size,
+
+  String? path,
+
+}) {
+
+  return AttachmentModel(
+
+    name: name,
+
+    bytes: bytes,
+
+    mimeType: mimeType,
+
+    size: size,
+
+    path: path,
+
+  );
+
+}
 
   Future<void> loadConversation() async {
 
@@ -112,18 +145,19 @@ class _ConversationScreenState
 
     onMessage: (data) {
      
+     
+      print('-------------$data["message"]');
 
       if (data["event"] !="new_message") {
         return;
       }
 
-      if (
-
-      data["conversation_id"] != widget.conversationId) {
+      if (data["conversation_id"] != widget.conversationId) {
         return;
       }
 
       final message = MessageModel.fromJson(data["message"]);
+     
 
       final exists =
 
@@ -158,30 +192,47 @@ class _ConversationScreenState
   );
 }
 
-Future<void> pickImage() async {
+Future<void> pickGallery() async {
 
-  final image =
+  final picker = ImagePicker();
 
-      await imagePicker.pickImage(
+  final XFile? image =
+
+      await picker.pickImage(
 
     source: ImageSource.gallery,
 
-    imageQuality: 80,
   );
 
   if (image == null) {
 
     return;
+
   }
+
+  final bytes =
+
+      await image.readAsBytes();
 
   setState(() {
 
-    selectedAttachment =
-        File(image.path);
+    attachment = createAttachment(
+
+      name: image.name,
+
+      bytes: bytes,
+
+      mimeType: "image/${image.name.split(".").last}",
+
+      size: bytes.length,
+
+      path: image.path,
+
+    );
+
   });
+
 }
-
-
 
  void scrollToBottom() {
 
@@ -206,128 +257,149 @@ Future<void> pickImage() async {
   });
 }
 
-
 Future<void> pickCamera() async {
 
-  final image = await imagePicker.pickImage(
+  final picker = ImagePicker();
+
+  final XFile? image =
+
+      await picker.pickImage(
 
     source: ImageSource.camera,
 
-    imageQuality: 80,
   );
 
-  if (image == null) return;
+  if (image == null) {
+
+    return;
+
+  }
+
+  final bytes =
+
+      await image.readAsBytes();
 
   setState(() {
 
-    selectedAttachment = File(image.path);
+    attachment = createAttachment(
+
+      name: image.name,
+
+      bytes: bytes,
+
+      mimeType: "image/${image.name.split(".").last}",
+
+      size: bytes.length,
+
+      path: image.path,
+
+    );
 
   });
+
 }
 
- 
 
- Future<void> pickDocument() async {
+Future<void> pickDocument() async {
 
-  final result = await FilePicker.pickFiles(
+  final result =
 
-    type: FileType.custom,
+      await FilePicker.pickFiles(
 
-    allowedExtensions: const [
-      "pdf",
-    ],
+    withData: true,
+
   );
 
   if (result == null) {
+
     return;
+
   }
 
+  final file = result.files.first;
+
   setState(() {
-    selectedAttachment = File(
-      result.files.single.path!,
+
+    attachment = createAttachment(
+
+      name: file.name,
+
+      bytes: file.bytes!,
+
+     mimeType: MimeTypes.fromExtension(
+        file.extension,
+      ),
+      size: file.size,
+
+      path: file.path,
+
     );
+
   });
+
 }
 
   Future<void> sendMessage() async {
 
-  if (sending) {
+    if (
 
-    return;
-  }
+        messageController.text.trim().isEmpty &&
 
-  if (
+        attachment == null
 
-      messageController.text
-          .trim()
-          .isEmpty &&
+    ) {
 
-      selectedAttachment == null) {
+        return;
 
-    return;
-  }
-
-  setState(() {
-
-    sending = true;
-  });
-
-  try {
-
-    await MessagingService()
-        .sendMessage(
-
-      conversationId:
-          widget.conversationId,
-
-      body:
-          messageController.text,
-
-      attachment:
-          selectedAttachment,
-    );
-
-    messageController.clear();
-
-    selectedAttachment = null;
-
-    if (mounted) {
-
-      setState(() {});
     }
 
-  } catch (e) {
+    try {
 
-    if (!mounted) return;
+        setState(() {
 
-    ScaffoldMessenger.of(context)
-        .showSnackBar(
+            sending = true;
 
-      SnackBar(
+        });
 
-        content: Text(
-          e.toString(),
-        ),
-      ),
-    );
+        await messagingService.sendMessage(
 
-  } finally {
+            conversationId: widget.conversationId,
 
-    if (mounted) {
+            body: messageController.text.trim(),
 
-      setState(() {
+            attachment: attachment,
 
-        sending = false;
-      });
+        );
+
+        messageController.clear();
+
+        setState(() {
+
+            attachment = null;
+
+        });
+
+    } finally {
+
+        if (mounted) {
+
+            setState(() {
+
+                sending = false;
+
+            });
+
+        }
+
     }
-  }
+
 }
 
   void removeAttachment() {
 
     setState(() {
 
-      selectedAttachment = null;
+      attachment  = null;
     });
   }
 
@@ -522,7 +594,7 @@ Future<void> pickCamera() async {
             ),
           ),
 
-          if (selectedAttachment != null)
+          if (attachment != null)
 
             Container(
 
@@ -544,18 +616,15 @@ Future<void> pickCamera() async {
 
                   const SizedBox(width: 8),
 
-                  Expanded(
+                  if (attachment != null)
 
-                    child: Text(
+                    AttachmentPreview(
 
-                      selectedAttachment!.path
-                          .split("/")
-                          .last,
+                      attachment: attachment!,
 
-                      overflow:
-                          TextOverflow.ellipsis,
+                      onRemove: removeAttachment,
+
                     ),
-                  ),
 
                   IconButton(
 
@@ -563,7 +632,7 @@ Future<void> pickCamera() async {
 
                       setState(() {
 
-                        selectedAttachment = null;
+                        attachment = null;
                       });
                     },
 
@@ -579,11 +648,11 @@ Future<void> pickCamera() async {
 
             controller: messageController,
 
-            attachment: selectedAttachment,
+            attachment: attachment,
 
             sending: sending,
 
-            onGallery: pickImage,
+            onGallery: pickGallery,
 
             onCamera: pickCamera,
 
@@ -596,5 +665,43 @@ Future<void> pickCamera() async {
         ],
       ),
     );
+  }
+}
+
+class MimeTypes {
+
+  static String fromExtension(
+    String? extension,
+  ) {
+
+    switch (
+      extension?.toLowerCase()
+    ) {
+
+      case "jpg":
+      case "jpeg":
+        return "image/jpeg";
+
+      case "png":
+        return "image/png";
+
+      case "pdf":
+        return "application/pdf";
+
+      case "doc":
+        return "application/msword";
+
+      case "docx":
+        return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+      case "xls":
+        return "application/vnd.ms-excel";
+
+      case "xlsx":
+        return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+      default:
+        return "application/octet-stream";
+    }
   }
 }
