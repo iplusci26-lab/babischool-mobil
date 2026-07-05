@@ -10,6 +10,9 @@ import '../widgets/student_info_tab.dart';
 import '../../attendance/attendance_tab.dart';
 import '../../grades/grades_tab.dart';
 import '../../payments/finance_tab.dart';
+import '../../assessments/assessment_tab.dart';
+import '../../homeworks/homework_tab.dart';
+import '../../schedule/schedule_tab.dart';
 
 class StudentDetailsScreen
     extends StatefulWidget {
@@ -75,7 +78,7 @@ class _StudentDetailsScreenState
 
     return DefaultTabController(
 
-      length: 4,
+      length: 7,
 
       child: Scaffold(
 
@@ -98,6 +101,18 @@ class _StudentDetailsScreenState
 
               Tab(
                 text: "Notes",
+              ),
+
+              Tab(
+                text: "Evaluations",
+              ),
+
+              Tab(
+                text: "Devoirs programmés"
+              ),
+
+              Tab(
+                text: "Emploi du temps",
               ),
 
               Tab(
@@ -133,11 +148,22 @@ class _StudentDetailsScreenState
                 studentId: widget.student.id,
               ),
 
+              AssessmentTab(
+                  studentId: widget.student.id,
+              ),
+
+              HomeworkTab(
+                studentId: widget.student.id,
+              ),
+
+              ScheduleTab(
+                  studentId: widget.student.id,
+              ),
               
               AttendanceTab(
                   studentId: widget.student.id,
               ),
-            
+
 
               FinanceTab(
                   studentId: widget.student.id,
