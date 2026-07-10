@@ -16,38 +16,44 @@ class ProfileMenuTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return Container(
+  return Padding(
 
-      margin: const EdgeInsets.only(
-        bottom: 12,
+    padding: const EdgeInsets.only(
+      bottom: 12,
+    ),
+
+    child: Material(
+
+      color: Colors.white,
+
+      elevation: 1,
+
+      shadowColor: const Color(
+        0x11000000,
       ),
 
-      decoration: BoxDecoration(
-
-        color: Colors.white,
-
-        borderRadius:
-            BorderRadius.circular(18),
-
-        boxShadow: const [
-
-          BoxShadow(
-            blurRadius: 10,
-            offset: Offset(0, 3),
-            color: Color(
-              0x11000000,
-            ),
-          ),
-        ],
+      borderRadius: BorderRadius.circular(
+        18,
       ),
+
+      clipBehavior: Clip.antiAlias,
 
       child: ListTile(
 
         onTap: onTap,
 
+        contentPadding: const EdgeInsets.symmetric(
+
+          horizontal: 16,
+
+          vertical: 6,
+
+        ),
+
         leading: Container(
 
           width: 40,
+
           height: 40,
 
           decoration: BoxDecoration(
@@ -55,35 +61,51 @@ class ProfileMenuTile extends StatelessWidget {
             color: const Color(
               0xff6214BE,
             ).withValues(
-              alpha: 0.1,
+              alpha: .10,
             ),
 
             borderRadius:
                 BorderRadius.circular(
               12,
             ),
+
           ),
 
           child: Icon(
+
             icon,
+
             color: const Color(
               0xff6214BE,
             ),
+
           ),
+
         ),
 
         title: Text(
+
           title,
+
           style: const TextStyle(
-            fontWeight:
-                FontWeight.w600,
+
+            fontWeight: FontWeight.w600,
+
           ),
+
         ),
 
         trailing: const Icon(
+
           Icons.chevron_right,
+
         ),
+
       ),
-    );
-  }
+
+    ),
+
+  );
+
+}
 }

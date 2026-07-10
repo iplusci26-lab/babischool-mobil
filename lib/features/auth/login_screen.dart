@@ -2,199 +2,510 @@ import 'package:flutter/material.dart';
 
 import '../../core/storage/secure_storage_service.dart';
 
-import '../dashboard/dashboard_screen.dart';
-import '../../shared/app_shell.dart';
+import 'services/auth_service.dart';
 
-import 'auth_service.dart';
+import 'splash_screen.dart';
 
-class LoginScreen
-extends StatefulWidget {
+import 'widgets/auth_header.dart';
+import 'widgets/auth_text_field.dart';
+import 'widgets/login_button.dart';
+
+class LoginScreen extends StatefulWidget {
 
   const LoginScreen({
     super.key,
   });
 
   @override
-  State<LoginScreen>
-  createState() =>
-  _LoginScreenState();
+  State<LoginScreen> createState() =>
+      _LoginScreenState();
+
 }
 
 class _LoginScreenState
-extends State<LoginScreen> {
+    extends State<LoginScreen> {
 
   final phoneController =
-  TextEditingController();
+      TextEditingController();
 
   final passwordController =
-  TextEditingController();
+      TextEditingController();
 
   bool loading = false;
 
-  Future<void> login()
-  async {
+  bool obscurePassword = true;
 
-      try {
+  //--------------------------------------------------
+
+  Future<void> login() async {
+
+    if (phoneController.text.trim().isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+
+        const SnackBar(
+
+          content: Text(
+            "Veuillez saisir votre numéro.",
+          ),
+
+        ),
+
+      );
+
+      return;
+
+    }
+
+    if (passwordController.text.isEmpty) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+
+        const SnackBar(
+
+          content: Text(
+            "Veuillez saisir votre mot de passe.",
+          ),
+
+        ),
+
+      );
+
+      return;
+
+    }
+
+    try {
 
       setState(() {
 
         loading = true;
+
       });
 
-      final result =
-      await AuthService().login(
+      final response =
+          await AuthService().login(
 
-        phone:
-        phoneController.text,
+        phone: phoneController.text.trim(),
 
         password:
-        passwordController.text,
+            passwordController.text,
+
+      );
+
+      //--------------------------------------
+
+      await SecureStorageService
+          .saveAccessToken(
+
+        response.access,
+
       );
 
       await SecureStorageService
-      .saveAccessToken(
-        result["access"],
+          .saveRefreshToken(
+
+        response.refresh,
+
       );
 
       await SecureStorageService
-      .saveRefreshToken(
-        result["refresh"],
+          .saveUserType(
+
+        response.user.userType,
+
       );
 
-      if (!mounted) {
-        return;
-      }
+      await SecureStorageService
+          .saveUser(
 
-      Navigator.pushReplacement(
+        response.user.toJson(),
+
+      );
+
+      //--------------------------------------
+
+      if (!mounted) return;
+
+      Navigator.pushAndRemoveUntil(
 
         context,
 
         MaterialPageRoute(
 
           builder: (_) =>
-          const AppShell(),
+              const SplashScreen(),
+
         ),
+
+        (_) => false,
+
       );
 
     } catch (e) {
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context)
+
+          .showSnackBar(
 
         SnackBar(
 
-          content:
-          Text(
+          content: Text(
+
             e.toString(),
+
           ),
+
         ),
+
       );
+
+    } finally {
+
+      if (mounted) {
+
+        setState(() {
+
+          loading = false;
+
+        });
+
+      }
+
     }
+
   }
 
+  //--------------------------------------------------
+
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  void dispose() {
+
+    phoneController.dispose();
+
+    passwordController.dispose();
+
+    super.dispose();
+
+  }
+
+  //--------------------------------------------------
+
+  @override
+  Widget build(BuildContext context) {
 
     return Scaffold(
 
-      body: Center(
+      backgroundColor:
+          const Color(0xffF7F8FC),
 
-        child: SizedBox(
+      body: Container(
 
-          width: 400,
+        decoration: const BoxDecoration(
 
-          child: Padding(
+          gradient: LinearGradient(
 
-            padding:
-            const EdgeInsets.all(
-              24,
-            ),
+            begin: Alignment.topCenter,
 
-            child: Column(
+            end: Alignment.bottomCenter,
 
-              mainAxisAlignment:
-              MainAxisAlignment.center,
+            colors: [
 
-              children: [
+              Color(0xff6214BE),
 
-                const Text(
+              Color(0xff8D4EF7),
 
-                  "BABISCHOOL",
+              Color(0xffF7F8FC),
 
-                  style: TextStyle(
+            ],
 
-                    fontSize: 32,
+            stops: [
 
-                    fontWeight:
-                    FontWeight.bold,
-                  ),
-                ),
+              0,
 
-                const SizedBox(
-                  height: 30,
-                ),
+              .35,
 
-                TextField(
+              .35,
 
-                  controller:
-                  phoneController,
+            ],
 
-                  decoration:
-                  const InputDecoration(
-
-                    labelText:
-                    "Téléphone",
-                  ),
-                ),
-
-                const SizedBox(
-                  height: 20,
-                ),
-
-                TextField(
-
-                  controller:
-                  passwordController,
-
-                  obscureText: true,
-
-                  decoration:
-                  const InputDecoration(
-
-                    labelText:
-                    "Mot de passe",
-                  ),
-                ),
-
-                const SizedBox(
-                  height: 30,
-                ),
-
-                ElevatedButton(
-
-                  onPressed:
-                  loading
-                  ? null
-                  : login,
-
-                  child:
-
-                  loading
-
-                  ? const CircularProgressIndicator()
-
-                  : const Text(
-                    "Connexion",
-                  ),
-                ),
-              ],
-            ),
           ),
+
         ),
+
+        child: SafeArea(
+
+          child: Center(
+
+            child: SingleChildScrollView(
+
+              padding:
+                  const EdgeInsets.all(24),
+
+              child: ConstrainedBox(
+
+                constraints:
+
+                    const BoxConstraints(
+
+                  maxWidth: 420,
+
+                ),
+
+                child: Column(
+
+                  children: [
+
+                    //------------------------------------------------
+                    // HEADER
+                    //------------------------------------------------
+
+                    const AuthHeader(),
+
+                    const SizedBox(
+
+                      height: 40,
+
+                    ),
+
+                    //------------------------------------------------
+                    // CARD
+                    //------------------------------------------------
+
+                    Container(
+
+                      padding:
+                          const EdgeInsets.all(
+
+                        28,
+
+                      ),
+
+                      decoration: BoxDecoration(
+
+                        color: Colors.white,
+
+                        borderRadius:
+
+                            BorderRadius.circular(
+
+                          28,
+
+                        ),
+
+                        boxShadow: const [
+
+                          BoxShadow(
+
+                            blurRadius: 30,
+
+                            color:
+
+                                Colors.black12,
+
+                            offset:
+
+                                Offset(0, 12),
+
+                          ),
+
+                        ],
+
+                      ),
+
+                      child: Column(
+
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+
+                        children: [
+
+                          const Text(
+
+                            "Connexion",
+
+                            style: TextStyle(
+
+                              fontSize: 26,
+
+                              fontWeight:
+                                  FontWeight.bold,
+
+                            ),
+
+                          ),
+
+                          const SizedBox(
+
+                            height: 6,
+
+                          ),
+
+                          Text(
+
+                            "Heureux de vous revoir 👋",
+
+                            style: TextStyle(
+
+                              color:
+                                  Colors.grey.shade600,
+
+                            ),
+
+                          ),
+
+                          const SizedBox(
+
+                            height: 30,
+
+                          ),
+
+                          AuthTextField(
+
+                            controller:
+                                phoneController,
+
+                            label:
+                                "Téléphone",
+
+                            icon:
+                                Icons.phone_android,
+
+                            keyboardType:
+                                TextInputType.phone,
+
+                          ),
+
+                          const SizedBox(
+
+                            height: 20,
+
+                          ),
+
+                          AuthTextField(
+
+                            controller:
+                                passwordController,
+
+                            label:
+                                "Mot de passe",
+
+                            icon:
+                                Icons.lock_outline,
+
+                            obscure:
+                                obscurePassword,
+
+                            suffixIcon:
+
+                                IconButton(
+
+                              onPressed: () {
+
+                                setState(() {
+
+                                  obscurePassword =
+                                      !obscurePassword;
+
+                                });
+
+                              },
+
+                              icon: Icon(
+
+                                obscurePassword
+
+                                    ? Icons.visibility
+
+                                    : Icons.visibility_off,
+
+                              ),
+
+                            ),
+
+                          ),
+
+                          const SizedBox(
+
+                            height: 30,
+
+                          ),
+
+                          LoginButton(
+
+                            loading: loading,
+
+                            onPressed: login,
+
+                          ),
+
+                          const SizedBox(
+
+                            height: 18,
+
+                          ),
+
+                          Center(
+
+                            child: Text(
+
+                              "Connexion sécurisée",
+
+                              style: TextStyle(
+
+                                color: Colors.grey.shade500,
+
+                                fontSize: 12,
+
+                              ),
+
+                            ),
+
+                          ),
+
+                        ],
+
+                      ),
+
+                    ),
+
+                    const SizedBox(
+
+                      height: 24,
+
+                    ),
+
+                    Text(
+
+                      "Version 1.0.0",
+
+                      style: TextStyle(
+
+                        color:
+                            Colors.grey.shade600,
+
+                      ),
+
+                    ),
+
+                  ],
+
+                ),
+
+              ),
+
+            ),
+
+          ),
+
+        ),
+
       ),
+
     );
+
   }
+
 }

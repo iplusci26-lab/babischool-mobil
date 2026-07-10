@@ -223,35 +223,68 @@ class _ProfileScreenState
     required String title,
     required VoidCallback onTap,
   }) {
-    return Container(
-      margin:
-          const EdgeInsets.only(
-        bottom: 12,
+    return Padding(
+
+    padding: const EdgeInsets.only(
+      bottom: 12,
+    ),
+
+    child: Material(
+
+      color: Colors.white,
+
+      elevation: 1,
+
+      borderRadius: BorderRadius.circular(
+        18,
       ),
 
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(
-          18,
-        ),
-      ),
+      clipBehavior: Clip.antiAlias,
 
       child: ListTile(
+
         onTap: onTap,
 
-        leading: Icon(
-          icon,
-          color:
-              const Color(0xff6214BE),
+        contentPadding: const EdgeInsets.symmetric(
+
+          horizontal: 20,
+
+          vertical: 4,
+
         ),
 
-        title: Text(title),
+        leading: Icon(
+
+          icon,
+
+          color: const Color(
+            0xff6214BE,
+          ),
+
+        ),
+
+        title: Text(
+
+          title,
+
+          style: const TextStyle(
+
+            fontWeight: FontWeight.w600,
+
+          ),
+
+        ),
 
         trailing: const Icon(
+
           Icons.chevron_right,
+
         ),
+
       ),
-    );
+
+    ),
+
+  );
   }
 }

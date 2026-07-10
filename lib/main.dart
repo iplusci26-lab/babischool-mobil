@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'features/splash/splash_screen.dart';
+import 'features/auth/splash_screen.dart';
 import 'core/api/api_client.dart';
 
 
