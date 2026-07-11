@@ -303,8 +303,8 @@ Future<void> pickCamera() async {
 Future<void> pickDocument() async {
 
   final result =
-
-      await FilePicker.pickFiles(
+      //FilePicker.pickFiles
+      await FilePicker.platform.pickFiles(
 
     withData: true,
 

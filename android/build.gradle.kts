@@ -22,3 +22,8 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
+
+
+subprojects {
+    project.extra.set("compileSdkVersion", 36)
+}

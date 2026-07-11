@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.babischool_mobile"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -20,7 +20,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -42,4 +42,26 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            if (requested.group == "com.mr.flutter.plugin.filepicker") {
+                // Si le plugin file_picker refuse de compiler, on force sa résolution
+            }
+        }
+    }
+}
+
+// Méthode globale pour écraser les propriétés de compilation de TOUS les modules Android
+project.rootProject.subprojects {
+    afterEvaluate {
+        if (plugins.hasPlugin("com.android.library") || plugins.hasPlugin("com.android.application")) {
+            extensions.findByType(com.android.build.gradle.BaseExtension::class.java)?.apply {
+                compileSdkVersion(36)
+            }
+        }
+    }
 }
