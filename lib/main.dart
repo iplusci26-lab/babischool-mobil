@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'features/auth/splash_screen.dart';
 import 'core/api/api_client.dart';
+import 'core/navigation/navigation_service.dart';
 
 
 void main() async {
@@ -27,6 +28,7 @@ class BabiSchoolApp
   ) {
 
     return MaterialApp(
+      navigatorKey: NavigationService.navigatorKey,
       debugShowCheckedModeBanner: false,
       title: "BABISCHOOL",
       home: const SplashScreen(),

@@ -7,6 +7,7 @@ import 'edit_profile_screen.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_menu_tile.dart';
 import 'change_password_screen.dart';
+import '../../auth/services/auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
@@ -185,32 +186,47 @@ class _ProfileScreenState
                   double.infinity,
 
               child: ElevatedButton.icon(
-                style:
-                    ElevatedButton
-                        .styleFrom(
-                  backgroundColor:
-                      Colors.red,
-                  padding:
-                      const EdgeInsets
-                          .symmetric(
-                    vertical:
-                        14,
-                  ),
-                ),
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.logout,
-                  color:
-                      Colors.white,
-                ),
-                label: const Text(
-                  "Déconnexion",
-                  style: TextStyle(
-                    color:
-                        Colors.white,
-                  ),
-                ),
-              ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: () async {
+
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text("Déconnexion"),
+                          content: const Text(
+                            "Voulez-vous vraiment vous déconnecter ?",
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text("Annuler"),
+                            ),
+                            FilledButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text("Déconnexion"),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm == true) {
+                        await AuthService.logout(context);
+                      }
+                    },
+                    icon: const Icon(
+                      Icons.logout,
+                      color: Colors.white,
+                    ),
+                    label: const Text(
+                      "Déconnexion",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
             ),
           ],
         ),
