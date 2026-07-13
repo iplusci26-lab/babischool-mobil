@@ -66,7 +66,15 @@ class FinanceSummaryModel {
 
       .toList(),
 
-      children:[],
-    );
+      children: (json["children"] as List? ?? [])
+
+      .map(
+
+        (e) => ChildFinanceModel.fromJson(e),
+
+      )
+
+      .toList(),
+      );
   }
 }

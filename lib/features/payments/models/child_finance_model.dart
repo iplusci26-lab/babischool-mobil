@@ -8,6 +8,8 @@ class ChildFinanceModel {
 
   final double balance;
 
+  
+
   ChildFinanceModel({
 
     required this.id,
