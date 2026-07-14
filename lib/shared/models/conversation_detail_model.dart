@@ -1,3 +1,4 @@
+import '../../features/messaging/models/conversation_header_model.dart';
 import 'message_model.dart';
 
 class ConversationDetailModel {
@@ -10,9 +11,11 @@ class ConversationDetailModel {
 
   final String currentUserId;
 
+  final ConversationHeaderModel header;
+
   final List<MessageModel> messages;
 
-  ConversationDetailModel({
+  const ConversationDetailModel({
 
     required this.id,
 
@@ -22,38 +25,45 @@ class ConversationDetailModel {
 
     required this.currentUserId,
 
+    required this.header,
+
     required this.messages,
+
   });
 
   factory ConversationDetailModel.fromJson(
-    Map<String,dynamic> json,
+    Map<String, dynamic> json,
   ) {
 
     return ConversationDetailModel(
 
-      id:
-      json["id"],
+      id: json["id"] ?? "",
 
-      studentName:
-      json["student_name"] ?? "",
+      studentName: json["student_name"] ?? "",
 
-      parentName:
-      json["parent_name"] ?? "",
+      parentName: json["parent_name"] ?? "",
 
       currentUserId:
-      json["current_user_id"].toString(),
+          json["current_user_id"].toString(),
 
-      messages:
+      header: ConversationHeaderModel.fromJson(
 
-      (json["messages"] as List)
+        json["header"] ?? {},
 
-      .map(
+      ),
 
-        (e) =>
-        MessageModel.fromJson(e),
-      )
+      messages: (json["messages"] as List? ?? [])
 
-      .toList(),
+          .map(
+
+            (e) => MessageModel.fromJson(e),
+
+          )
+
+          .toList(),
+
     );
+
   }
+
 }

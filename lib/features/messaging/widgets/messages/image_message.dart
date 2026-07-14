@@ -67,11 +67,11 @@ class ImageMessage extends StatelessWidget {
                     ),
                   );
                 },
-
+                
                 child: Hero(
 
                   tag: message.id,
-
+                  
                   child: Image.network(
 
                     message.attachment ?? "",
@@ -133,18 +133,24 @@ class ImageMessage extends StatelessWidget {
                           stack,
 
                         ) {
+                      
+                      print("IMAGE ERROR =====================");
+                      print(error);
+                      print(message.attachment);
+                      print("=================================");
 
-                      return const SizedBox(
+                      return SizedBox(
 
                         height: 220,
 
                         child: Center(
 
-                          child: Icon(
+                          child: Text(
 
-                            Icons.broken_image,
+                            error.toString(),
 
-                            size: 60,
+                            textAlign: TextAlign.center,
+
                           ),
                         ),
                       );

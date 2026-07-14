@@ -80,23 +80,24 @@ AttachmentModel createAttachment({
 
 }) {
 
-  return AttachmentModel(
+    return AttachmentModel(
 
-    name: name,
+      name: name,
 
-    bytes: bytes,
+      bytes: bytes,
 
-    mimeType: mimeType,
+      mimeType: mimeType,
 
-    size: size,
+      size: size,
 
-    path: path,
+      path: path,
 
-  );
+    );
 
-}
+  }
 
-  Future<void> loadConversation() async {
+
+Future<void> loadConversation() async {
 
   try {
 
@@ -126,6 +127,7 @@ AttachmentModel createAttachment({
 
   } catch (e) {
 
+  
     if (mounted) {
 
       setState(() {
@@ -470,95 +472,225 @@ Future<void> pickDocument() async {
 
     appBar: AppBar(
 
-      elevation: 0,
+        elevation: 0,
 
-      backgroundColor: Colors.white,
+        backgroundColor: Colors.white,
 
-      foregroundColor: Colors.black,
+        foregroundColor: Colors.black,
 
-      titleSpacing: 0,
+        titleSpacing: 0,
 
-      title: Row(
+        title: Row(
 
-        children: [
+          children: [
 
-          CircleAvatar(
+            //----------------------------------------
+            // Avatar
+            //----------------------------------------
 
-            radius: 22,
+            CircleAvatar(
 
-            backgroundColor:
-                const Color(0xff6214BE),
+              radius: 24,
 
-            child: Text(
+              backgroundColor: const Color(0xff6214BE),
 
-              conversation!
-                  .studentName[0]
-                  .toUpperCase(),
+              backgroundImage:
 
-              style: const TextStyle(
+                  conversation!.header.contact.avatar != null
 
-                color: Colors.white,
+                      ? NetworkImage(
 
-                fontWeight: FontWeight.bold,
+                          conversation!.header.contact.avatar!,
+
+                        )
+
+                      : null,
+
+              child:
+
+                  conversation!.header.contact.avatar == null
+
+                      ? Text(
+
+                          conversation!
+                              .header
+                              .contact
+                              .name[0]
+                              .toUpperCase(),
+
+                          style: const TextStyle(
+
+                            color: Colors.white,
+
+                            fontWeight: FontWeight.bold,
+
+                            fontSize: 18,
+
+                          ),
+
+                        )
+
+                      : null,
+
+            ),
+
+            const SizedBox(
+
+              width: 12,
+
+            ),
+
+            //----------------------------------------
+            // Nom + Fonction + Elève
+            //----------------------------------------
+
+            Expanded(
+
+              child: Column(
+
+                crossAxisAlignment:
+
+                    CrossAxisAlignment.start,
+
+                mainAxisAlignment:
+
+                    MainAxisAlignment.center,
+
+                children: [
+
+                  Text(
+
+                    conversation!.header.contact.name,
+
+                    maxLines: 1,
+
+                    overflow:
+
+                        TextOverflow.ellipsis,
+
+                    style: const TextStyle(
+
+                      fontWeight:
+
+                          FontWeight.bold,
+
+                      fontSize: 16,
+
+                    ),
+
+                  ),
+
+                  const SizedBox(
+
+                    height: 2,
+
+                  ),
+
+                  Text(
+
+                    conversation!.header.contact.role,
+
+                    style: TextStyle(
+
+                      color:
+
+                          Colors.deepPurple.shade400,
+
+                      fontSize: 13,
+
+                      fontWeight:
+
+                          FontWeight.w600,
+
+                    ),
+
+                  ),
+
+                  const SizedBox(
+
+                    height: 2,
+
+                  ),
+
+                  Row(
+
+                    children: [
+
+                      const Icon(
+
+                        Icons.school,
+
+                        size: 14,
+
+                        color: Colors.grey,
+
+                      ),
+
+                      const SizedBox(
+
+                        width: 4,
+
+                      ),
+
+                      Expanded(
+
+                        child: Text(
+
+                          "${conversation!.header.student.name} • ${conversation!.header.student.classroom}",
+
+                          maxLines: 1,
+
+                          overflow:
+
+                              TextOverflow.ellipsis,
+
+                          style: TextStyle(
+
+                            fontSize: 12,
+
+                            color:
+
+                                Colors.grey.shade600,
+
+                          ),
+
+                        ),
+
+                      ),
+
+                    ],
+
+                  ),
+
+                ],
+
               ),
+
             ),
-          ),
 
-          const SizedBox(width: 12),
+          ],
 
-          Expanded(
-
-            child: Column(
-
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
-
-              children: [
-
-                Text(
-
-                  conversation!.studentName,
-
-                  style: const TextStyle(
-
-                    fontWeight:
-                        FontWeight.bold,
-
-                    fontSize: 16,
-                  ),
-                ),
-
-                Text(
-
-                  conversation!.parentName,
-
-                  style: TextStyle(
-
-                    fontSize: 12,
-
-                    color:
-                        Colors.grey.shade600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-
-      actions: [
-
-        IconButton(
-
-          onPressed: () {},
-
-          icon: const Icon(
-            Icons.more_vert,
-          ),
         ),
-      ],
-    ),
-            body: Column(
+
+        actions: [
+
+          IconButton(
+
+            onPressed: () {},
+
+            icon: const Icon(
+
+              Icons.more_vert,
+
+            ),
+
+          ),
+
+        ],
+
+      ),
+   
+    body: Column(
 
         children: [
 

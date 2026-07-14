@@ -14,6 +14,8 @@ class MessagingService {
       "/messaging/conversations/",
     );
 
+    print("donee----------- ${response.data}");
+
     return response.data;
   }
 
@@ -27,7 +29,7 @@ class MessagingService {
     await ApiClient.dio.get(
       "/messaging/conversations/$id/",
     );
-
+    print(response.data);
     return response.data;
   }
 
