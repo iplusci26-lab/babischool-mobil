@@ -56,7 +56,7 @@ class FinanceCard
 
           const Text(
 
-            "Situation financière",
+            "Reste à payer",
 
             style: TextStyle(
               color: Colors.white70,
@@ -109,16 +109,17 @@ class FinanceCard
             children: [
 
               _InfoItem(
+                title: "Payé",
+                value:
+                    amountPaid.toInt(),
+              ),
+              
+               _InfoItem(
                 title: "Scolarité",
                 value:
                     tuitionFee.toInt(),
               ),
 
-              _InfoItem(
-                title: "Payé",
-                value:
-                    amountPaid.toInt(),
-              ),
             ],
           ),
         ],

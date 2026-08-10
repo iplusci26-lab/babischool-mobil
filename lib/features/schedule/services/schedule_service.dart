@@ -14,6 +14,7 @@ class ScheduleService {
 
     );
 
+    print("donnée schedule ${response.data}");
     return ScheduleResponseModel.fromJson(
 
       response.data,

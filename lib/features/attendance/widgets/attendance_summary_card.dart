@@ -14,6 +14,9 @@ class AttendanceSummaryCard
     required this.summary,
   });
 
+
+ 
+
   @override
   Widget build(
     BuildContext context,
@@ -48,7 +51,7 @@ class AttendanceSummaryCard
 
           const Text(
 
-            "Résumé de présence",
+            "Résumé des présences",
 
             style: TextStyle(
 

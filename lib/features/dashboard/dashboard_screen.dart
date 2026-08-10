@@ -5,17 +5,28 @@ import '../../shared/models/dashboard_model.dart';
 import 'dashboard_service.dart';
 
 import 'widgets/dashboard_header.dart';
+
 import 'widgets/children_section.dart';
+
 import 'widgets/quick_actions.dart';
+
+import '../../core/theme/app_colors.dart';
 
 import '../../core/storage/secure_storage_service.dart';
 
 import '../notifications/notification_screen.dart';
 
-import '../notifications/notification_service.dart';
+import '../messaging/conversation_screen.dart';
 
-import '../notifications/notification_websocket_service.dart';
 import '../student_details/screens/student_details_screen.dart';
+
+import '../../shared/widgets/app_header.dart';
+
+import '../../../core/navigation/navigation_controller.dart';
+
+import 'package:babischool_mobile/core/utils/date_formatter.dart';
+
+import '../announcements/screens/announcement_detail_screen.dart';
 
 class DashboardScreen
 extends StatefulWidget {
@@ -33,11 +44,6 @@ extends StatefulWidget {
 class _DashboardScreenState
 extends State<DashboardScreen> {
 
-  int unreadCount = 0;
-
-  final NotificationWebSocketService
-  notificationSocket =
-  NotificationWebSocketService();
 
   DashboardModel? dashboard;
 
@@ -76,51 +82,7 @@ extends State<DashboardScreen> {
     });
   }
 
-  Future<void>
-  loadUnreadCount()
-  async {
-
-    try {
-
-      unreadCount =
-
-      await NotificationService()
-      .getUnreadCount();
-
-      if (mounted) {
-
-        setState(() {});
-      }
-
-    } catch (e) {
-
-      debugPrint(
-        e.toString(),
-      );
-    }
-  }
-
-  Future<void>
-initializeNotifications()
-async {
-
-  await loadUnreadCount();
-
-  await notificationSocket.connect(
-
-    onNotification: (data) {
-
-      print(
-        "NEW NOTIFICATION => $data"
-      );
-
-      setState(() {
-
-        unreadCount++;
-      });
-    },
-  );
-}
+ 
 
   @override
   void initState() {
@@ -128,16 +90,8 @@ async {
     super.initState();
 
     loadData();
-    initializeNotifications();
   }
 
-  @override
-  void dispose() {
-
-    notificationSocket.disconnect();
-
-    super.dispose();
-  }
 
   @override
   Widget build(
@@ -157,10 +111,7 @@ async {
 
       return Scaffold(
 
-        backgroundColor:
-        const Color(
-          0xffF7F8FC,
-        ),
+        backgroundColor:AppColors.background,
 
         body: SafeArea(
 
@@ -170,192 +121,305 @@ async {
 
             child: ListView(
 
-              padding:
-              const EdgeInsets.all(
-                20,
+            padding: const EdgeInsets.only(
+                bottom: 20,
               ),
 
               children: [
-
-                DashboardHeader(
-
-                  parentName:
-                  dashboard?.parentName
-                      ?? "",
-
-                  unreadCount:
-                  unreadCount,
-
-                  onNotificationTap:
-                  () async {
-
-                    await Navigator.push(
-
-                      context,
-
-                      MaterialPageRoute(
-
-                        builder: (_) =>
-                        const NotificationScreen(),
-                      ),
-                    );
-
-                    loadUnreadCount();
-                  },
-                ),
-
-                const SizedBox(
-                  height: 30,
-                ),
-
-                const Text(
-
-                  "Mes enfants",
-
-                  style: TextStyle(
-
-                    fontSize: 18,
-
-                    fontWeight:
-                    FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(
-                  height: 16,
-                ),
-
-                ChildrenSection(
-
-                  students:dashboard!.students,
-
-                      onStudentTap:(student) {
-
-                        Navigator.push(
-
-                          context,
-
-                          MaterialPageRoute(
-
-                            builder: (_) =>
-
-                            StudentDetailsScreen(
-                              student: student,
-                            ),
-                          ),
-                        );
+                Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 0),
+                    child:AppHeader(
+                      title: "Bonjour M. / Mme ${dashboard?.parentName.split(" ").last ?? ""} 👋",
+                      subtitle: "Informez-vous de l'activité de vos enfants à l'école",
+                      onNotificationTap: () {
+                        NavigationController.goTo(1);
                       },
                     ),
+                ),
 
                 const SizedBox(
                   height: 30,
                 ),
-
-                QuickActions(
-
-                    onNotes: () {
-
-                      print("NOTES");
-                    },
-
-                    onAttendance: () {
-
-                      print("PRESENCE");
-                    },
-
-                    onPayments: () {
-
-                      setState(() {
-
-                        // futur switch navigation
-                      });
-                    },
-
-                    onAnnouncements: () {
-
-                      print("ANNONCES");
-                    },
-                  ),
-
-                const SizedBox(
-                  height: 30,
-                ),
-
-                Container(
-
-                  padding:
-                  const EdgeInsets.all(
-                    20,
-                  ),
-
-                  decoration:
-                  BoxDecoration(
-
-                    color: Colors.white,
-
-                    borderRadius:
-                    BorderRadius.circular(
-                      24,
-                    ),
-
-                    boxShadow: [
-
-                      BoxShadow(
-
-                        color: Colors.black
-                            .withValues(
-                          alpha: 0.05,
-                        ),
-
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
-
+                
+                 Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  
                   child: Column(
-
-                    crossAxisAlignment:
-                    CrossAxisAlignment.start,
-
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                        
+                        const Text(
 
-                      const Text(
+                          "Mes enfants",
 
-                        "Dernières activités",
+                          style: TextStyle(
 
-                        style: TextStyle(
+                            fontSize: 18,
 
-                          fontSize: 18,
-
-                          fontWeight:
-                          FontWeight.bold,
+                            fontWeight:
+                            FontWeight.bold,
+                          ),
                         ),
-                      ),
 
-                      const SizedBox(
-                        height: 16,
-                      ),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        ChildrenSection(
 
-                      _activityTile(
-                        Icons.notifications,
-                        "Nouvelle annonce",
-                        "L'école a publié une annonce",
-                      ),
+                          students:dashboard!.students,
 
-                      _activityTile(
-                        Icons.payments,
-                        "Paiement reçu",
-                        "Votre paiement a été enregistré",
-                      ),
+                              onStudentTap:(student) {
 
-                      _activityTile(
-                        Icons.message,
-                        "Nouveau message",
-                        "Vous avez reçu un message",
-                      ),
+                                Navigator.push(
+
+                                  context,
+
+                                  MaterialPageRoute(
+
+                                    builder: (_) =>
+
+                                    StudentDetailsScreen(
+                                      student: student,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+
+                        const SizedBox(
+                          height: 30,
+                        ),
+
+                        
+
+                        
+                        Container(
+
+                          padding:
+                          const EdgeInsets.all(
+                            20,
+                          ),
+
+                          decoration:
+                          BoxDecoration(
+
+                            color: Color(0xff6214BE),
+
+                            borderRadius:
+                            BorderRadius.circular(
+                              24,
+                            ),
+
+                            boxShadow: [
+
+                              BoxShadow(
+
+                                color: Colors.white
+                                    .withValues(
+                                  alpha: 0.05,
+                                ),
+
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+
+                          child: Column(
+
+                            crossAxisAlignment:
+                            CrossAxisAlignment.start,
+
+                            children: [
+
+                              const Text(
+
+                                "Dernières activités",
+
+                                style: TextStyle(
+
+                                  fontSize: 18,
+
+                                  fontWeight:
+                                  FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+
+                              const SizedBox(
+                                height: 16,
+                              ),
+
+
+                            if (dashboard!.activities.isEmpty)
+
+                                Container(
+
+                                  padding: const EdgeInsets.all(20),
+
+                                  alignment: Alignment.center,
+
+                                  child: const Text(
+
+                                    "Aucune activité récente",
+
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                )
+
+                              else
+
+                                ...dashboard!.activities.map((activity) {
+
+                                        IconData icon;
+
+                                        Color color;
+
+                                        switch (activity.type) {
+
+                                          case "payment":
+
+                                            icon = Icons.payments;
+
+                                            color = const Color(0xFF18B26B);
+
+                                            break;
+
+                                          case "message":
+
+                                            icon = Icons.message;
+
+                                            color = const Color(0xFF2196F3);
+
+                                            break;
+
+                                          default:
+
+                                            icon = Icons.notifications;
+
+                                            color = const Color(0xFF6214BE);
+                                        }
+
+                                        return _activityTile(
+
+                                          icon: icon,
+
+                                          title: activity.title,
+
+                                          subtitle:
+
+                                              activity.studentName == null
+
+                                                  ? activity.description
+
+                                                  : "${activity.studentName} • ${activity.description}",
+
+                                          color: color,
+
+                                          time: DateFormatter.relative(
+                                            activity.date,
+                                          ),
+
+                                          isRead: activity.isRead,
+
+                                          onTap: () {
+
+                                            switch (activity.type) {
+
+                                              case "announcement":
+                                                   ScaffoldMessenger.of(context).showSnackBar(
+
+                                                    const SnackBar(
+
+                                                      content: Text(
+                                                        "Détail des annonces bientôt disponible",
+                                                      ),
+                                                    ),
+                                                  );
+                                               /* Navigator.push(
+
+                                                  context,
+
+                                                  MaterialPageRoute(
+
+                                                    builder: (_) => AnnouncementDetailScreen(
+
+                                                      announcementId:
+                                                          activity.targetId,
+                                                    ),
+                                                  ),
+                                                );**/
+
+                                                break;
+
+                                              case "payment":
+
+                                                NavigationController.goTo(3);
+
+                                                break;
+
+                                              case "message":
+
+                                                Navigator.push(
+
+                                                  context,
+
+                                                  MaterialPageRoute(
+
+                                                    builder: (_) => ConversationScreen(
+
+                                                      conversationId:
+                                                          activity.targetId,
+                                                    ),
+                                                  ),
+                                                );
+
+                                                break;
+                                            }
+                                          },
+                                        );
+
+                                      }),
+                                                                  
+
+                          
+                            ],
+                          ),
+                        ),
+                          const SizedBox(
+                          height: 30,
+                        ),
+
+                        QuickActions(
+
+                            onNotes: () {
+
+                              print("NOTES");
+                            },
+
+                            onAttendance: () {
+
+                              print("PRESENCE");
+                            },
+
+                            onPayments: () {
+
+                              setState(() {
+
+                                // futur switch navigation
+                              });
+                            },
+
+                            onAnnouncements: () {
+
+                              print("ANNONCES");
+                            },
+                          ),
+
                     ],
-                  ),
-                ),
+                  )
+                 ),
               ],
             ),
           ),
@@ -364,43 +428,184 @@ async {
 
   }
 
-  Widget _activityTile(
+  Widget _activityTile({
 
-  IconData icon,
+  required IconData icon,
 
-  String title,
+  required String title,
 
-  String subtitle,
-) {
+  required String subtitle,
 
-  return ListTile(
+  required Color color,
 
-    contentPadding:
-    EdgeInsets.zero,
+  required String time,
 
-    leading: CircleAvatar(
+  required bool isRead,
 
-      backgroundColor:
-      const Color(
-        0xff6214BE,
-      ).withValues(
-        alpha: 0.1,
-      ),
+  required VoidCallback onTap,
 
-      child: Icon(
+}) {
 
-        icon,
+  return Padding(
 
-        color:
-        const Color(
-          0xff6214BE,
+    padding: const EdgeInsets.only(bottom: 12),
+
+    child: Material(
+
+      color: Colors.white,
+
+      borderRadius: BorderRadius.circular(16),
+
+      child: InkWell(
+
+        borderRadius: BorderRadius.circular(16),
+
+        onTap: onTap,
+
+        child: Padding(
+
+          padding: const EdgeInsets.all(14),
+
+          child: Row(
+
+            children: [
+
+              Container(
+
+                width: 48,
+
+                height: 48,
+
+                decoration: BoxDecoration(
+
+                  color: color.withOpacity(.12),
+
+                  borderRadius:
+                      BorderRadius.circular(14),
+
+                ),
+
+                child: Icon(
+
+                  icon,
+
+                  color: color,
+
+                ),
+              ),
+
+              const SizedBox(width: 14),
+
+              Expanded(
+
+                child: Column(
+
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+
+                  children: [
+
+                    Row(
+
+                      children: [
+
+                        Expanded(
+
+                          child: Text(
+
+                            title,
+
+                            maxLines: 1,
+
+                            overflow:
+                                TextOverflow.ellipsis,
+
+                            style: TextStyle(
+
+                              fontWeight: isRead
+                                  ? FontWeight.w600
+                                  : FontWeight.bold,
+
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+
+                        if (!isRead)
+
+                          Container(
+
+                            width: 9,
+
+                            height: 9,
+
+                            margin:
+                                const EdgeInsets.only(
+                                    left: 6),
+
+                            decoration:
+                                const BoxDecoration(
+
+                              color:
+                                  Color(0xFF6214BE),
+
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+
+                        const SizedBox(width: 8),
+
+                        Text(
+
+                          time,
+
+                          style: TextStyle(
+
+                            color:
+                                Colors.grey.shade500,
+
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 5),
+
+                    Text(
+
+                      subtitle,
+
+                      maxLines: 2,
+
+                      overflow:
+                          TextOverflow.ellipsis,
+
+                      style: TextStyle(
+
+                        color:
+                            Colors.grey.shade600,
+
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              Icon(
+
+                Icons.chevron_right,
+
+                color: Colors.grey.shade400,
+              ),
+            ],
+          ),
         ),
       ),
     ),
-
-    title: Text(title),
-
-    subtitle: Text(subtitle),
   );
 }
 }

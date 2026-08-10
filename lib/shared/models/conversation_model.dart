@@ -1,8 +1,12 @@
+import 'contact_model.dart';
+
 class ConversationModel {
 
   final String id;
 
   final String studentId;
+
+  final ContactModel contact;
 
   final String studentName;
 
@@ -23,6 +27,8 @@ class ConversationModel {
     required this.id,
 
     required this.studentId,
+
+    required this.contact,
 
     required this.studentName,
 
@@ -80,6 +86,10 @@ class ConversationModel {
 
       studentId:
       json["student_id"]?.toString() ?? "",
+
+      contact: ContactModel.fromJson(
+        json["contact"] ?? {},
+      ),
 
       studentName:
       json["student_name"] ?? "",

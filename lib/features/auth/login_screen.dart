@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../../core/storage/secure_storage_service.dart';
 
+import '../../core/notifications/notification_service.dart';
+
 import 'services/auth_service.dart';
 
 import 'splash_screen.dart';
 
 import 'widgets/auth_header.dart';
+
 import 'widgets/auth_text_field.dart';
+
 import 'widgets/login_button.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -123,6 +127,14 @@ class _LoginScreenState
 
       );
 
+   
+        //--------------------------------------
+        // Enregistrer le token FCM pour ce compte
+        //--------------------------------------
+
+        await NotificationService.instance.registerDevice();
+
+        
       //--------------------------------------
 
       if (!mounted) return;
@@ -152,11 +164,7 @@ class _LoginScreenState
 
         SnackBar(
 
-          content: Text(
-
-            e.toString(),
-
-          ),
+          content: Text("Connexion echoué !"),
 
         ),
 
@@ -266,7 +274,7 @@ class _LoginScreenState
 
                     const SizedBox(
 
-                      height: 40,
+                      height: 50,
 
                     ),
 

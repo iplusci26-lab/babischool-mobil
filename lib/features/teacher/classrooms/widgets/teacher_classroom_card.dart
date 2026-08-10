@@ -1,161 +1,171 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/subject_color.dart';
-import '../../../../shared/widgets/premium_card.dart';
-
-import '../models/teacher_course_model.dart';
+import '../models/teacher_assignment_model.dart';
 
 class TeacherClassroomCard extends StatelessWidget {
 
-  final TeacherCourseModel course;
+  final TeacherAssignmentModel assignment;
 
   final VoidCallback? onTap;
-
-  final VoidCallback? onAttendance;
-
-  final VoidCallback? onGrades;
-
-  final VoidCallback? onHomework;
 
   const TeacherClassroomCard({
 
     super.key,
 
-    required this.course,
+    required this.assignment,
 
     this.onTap,
 
-    this.onAttendance,
-
-    this.onGrades,
-
-    this.onHomework,
-
   });
+
+  //----------------------------------------------------------
+
+  Color get accentColor {
+
+    switch (assignment.color) {
+
+      case "green":
+        return Colors.green;
+
+      case "orange":
+        return Colors.orange;
+
+      case "purple":
+        return Colors.deepPurple;
+
+      case "teal":
+        return Colors.teal;
+
+      case "indigo":
+        return Colors.indigo;
+
+      case "cyan":
+        return Colors.cyan;
+
+      default:
+        return Colors.blue;
+
+    }
+
+  }
+
+  //----------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
 
-    final color = subjectColor(course.color);
+    return Card(
 
-    return PremiumCard(
+      elevation: 0,
+
+      margin: const EdgeInsets.only(
+
+        bottom: 18,
+
+      ),
+
+      shape: RoundedRectangleBorder(
+
+        borderRadius:
+
+            BorderRadius.circular(22),
+
+      ),
 
       child: InkWell(
 
-        borderRadius: BorderRadius.circular(22),
+        borderRadius:
+
+            BorderRadius.circular(22),
 
         onTap: onTap,
 
-        child: Column(
+        child: Container(
 
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          padding: const EdgeInsets.all(
 
-          children: [
+            20,
 
-            //--------------------------------------------------
-            // HEADER
-            //--------------------------------------------------
+          ),
 
-            Row(
+          decoration: BoxDecoration(
 
-              children: [
+            color: Colors.white,
 
-                CircleAvatar(
+            borderRadius:
 
-                  radius: 24,
+                BorderRadius.circular(
 
-                  backgroundColor:
-                      color.withOpacity(.12),
+              22,
 
-                  child: Icon(
+            ),
 
-                    Icons.menu_book,
+          ),
 
-                    color: color,
+          child: Row(
 
-                  ),
+            crossAxisAlignment:
 
-                ),
+                CrossAxisAlignment.start,
 
-                const SizedBox(width: 14),
+            children: [
 
-                Expanded(
+              //------------------------------------------------
+              // COULEUR
+              //------------------------------------------------
 
-                  child: Column(
+              Container(
 
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                width: 6,
 
-                    children: [
+                height: 140,
 
-                      Text(
+                decoration: BoxDecoration(
 
-                        course.name,
+                  color: accentColor,
 
-                        style: const TextStyle(
+                  borderRadius:
 
-                          fontSize: 18,
+                      BorderRadius.circular(
 
-                          fontWeight:
-                              FontWeight.bold,
-
-                        ),
-
-                      ),
-
-                      const SizedBox(height: 4),
-
-                      Text(
-
-                        course.subject,
-
-                        style: TextStyle(
-
-                          color:
-                              Colors.grey.shade700,
-
-                        ),
-
-                      ),
-
-                    ],
+                    50,
 
                   ),
 
                 ),
 
-                if (course.today)
+              ),
 
-                  Container(
+              const SizedBox(
 
-                    padding:
-                        const EdgeInsets.symmetric(
+                width: 18,
 
-                      horizontal: 10,
+              ),
 
-                      vertical: 6,
+              //------------------------------------------------
+              // CONTENU
+              //------------------------------------------------
 
-                    ),
+              Expanded(
 
-                    decoration: BoxDecoration(
+                child: Column(
 
-                      color: Colors.green
-                          .withOpacity(.12),
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
 
-                      borderRadius:
-                          BorderRadius.circular(30),
+                  children: [
 
-                    ),
+                    //------------------------------------------------
+                    // CLASSE
+                    //------------------------------------------------
 
-                    child: const Text(
+                    Text(
 
-                      "Aujourd'hui",
+                      assignment.classroomName,
 
-                      style: TextStyle(
+                      style: const TextStyle(
 
-                        color: Colors.green,
+                        fontSize: 22,
 
                         fontWeight:
                             FontWeight.bold,
@@ -164,149 +174,327 @@ class TeacherClassroomCard extends StatelessWidget {
 
                     ),
 
-                  ),
+                    const SizedBox(
 
-              ],
-
-            ),
-
-            const SizedBox(height: 20),
-
-            //--------------------------------------------------
-            // INFOS
-            //--------------------------------------------------
-
-            Row(
-
-              children: [
-
-                const Icon(
-
-                  Icons.groups,
-
-                  color: AppColors.primary,
-
-                ),
-
-                const SizedBox(width: 8),
-
-                Text(
-
-                  "${course.students} élèves",
-
-                ),
-
-                const Spacer(),
-
-                const Icon(
-
-                  Icons.schedule,
-
-                  color: AppColors.primary,
-
-                ),
-
-                const SizedBox(width: 8),
-
-                Text(
-
-                  course.nextCourse,
-
-                ),
-
-              ],
-
-            ),
-
-            const SizedBox(height: 22),
-
-            //--------------------------------------------------
-            // ACTIONS
-            //--------------------------------------------------
-
-            Row(
-
-              children: [
-
-                Expanded(
-
-                  child: FilledButton.icon(
-
-                    onPressed: onAttendance,
-
-                    icon: const Icon(
-
-                      Icons.fact_check,
+                      height: 10,
 
                     ),
 
-                    label: const Text(
+                    //------------------------------------------------
+                    // BADGES
+                    //------------------------------------------------
 
-                      "Appel",
+                    Wrap(
+
+                      spacing: 8,
+
+                      runSpacing: 8,
+
+                      children: [
+
+                        _Badge(
+
+                          text: assignment.isPrimary
+                              ? "Primaire"
+                              : "Secondaire",
+
+                          color: accentColor,
+
+                        ),
+
+                        if (assignment
+                            .isHomeroomTeacher)
+
+                          const _Badge(
+
+                            text:
+                                "Professeur principal",
+
+                            color: Colors.green,
+
+                          ),
+
+                      ],
 
                     ),
 
-                  ),
+                    const SizedBox(
+
+                      height: 16,
+
+                    ),
+
+                    //------------------------------------------------
+                    // MATIERE
+                    //------------------------------------------------
+
+                    _InfoTile(
+
+                      icon: Icons.menu_book,
+
+                      title: "Matière",
+
+                      value:
+                          assignment.subjectName,
+
+                    ),
+
+                    if (assignment.hasGroup)
+
+                      Padding(
+
+                        padding:
+                            const EdgeInsets.only(
+
+                          top: 10,
+
+                        ),
+
+                        child: _InfoTile(
+
+                          icon: Icons.group,
+
+                          title: "Groupe",
+
+                          value:
+                              assignment.groupName!,
+
+                        ),
+
+                      ),
+
+                    Padding(
+
+                      padding:
+                          const EdgeInsets.only(
+
+                        top: 10,
+
+                      ),
+
+                      child: _InfoTile(
+
+                        icon: Icons.people,
+
+                        title: "Élèves",
+
+                        value:
+                            "${assignment.students}",
+
+                      ),
+
+                    ),
+
+                    if (assignment.hasNextCourse)
+
+                      Padding(
+
+                        padding:
+                            const EdgeInsets.only(
+
+                          top: 10,
+
+                        ),
+
+                        child: _InfoTile(
+
+                          icon: Icons.schedule,
+
+                          title:
+                              "Prochain cours",
+
+                          value:
+
+                              assignment.nextCourse!
+
+                                  .period,
+
+                        ),
+
+                      ),
+
+                  ],
 
                 ),
 
-                const SizedBox(width: 10),
+              ),
 
-                Expanded(
+              //------------------------------------------------
+              // FLECHE
+              //------------------------------------------------
 
-                  child: FilledButton.icon(
+              const Icon(
 
-                    onPressed: onGrades,
+                Icons.chevron_right,
 
-                    icon: const Icon(
+                color: Colors.grey,
 
-                      Icons.edit_note,
+              ),
 
-                    ),
+            ],
 
-                    label: const Text(
-
-                      "Notes",
-
-                    ),
-
-                  ),
-
-                ),
-
-                const SizedBox(width: 10),
-
-                Expanded(
-
-                  child: FilledButton.icon(
-
-                    onPressed: onHomework,
-
-                    icon: const Icon(
-
-                      Icons.assignment,
-
-                    ),
-
-                    label: const Text(
-
-                      "Devoir",
-
-                    ),
-
-                  ),
-
-                ),
-
-              ],
-
-            ),
-
-          ],
+          ),
 
         ),
 
       ),
+
+    );
+
+  }
+
+}
+
+//////////////////////////////////////////////////////////////
+// BADGE
+//////////////////////////////////////////////////////////////
+
+class _Badge extends StatelessWidget {
+
+  final String text;
+
+  final Color color;
+
+  const _Badge({
+
+    required this.text,
+
+    required this.color,
+
+  });
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Container(
+
+      padding:
+          const EdgeInsets.symmetric(
+
+        horizontal: 12,
+
+        vertical: 6,
+
+      ),
+
+      decoration: BoxDecoration(
+
+        color:
+
+            color.withOpacity(.10),
+
+        borderRadius:
+
+            BorderRadius.circular(
+
+          30,
+
+        ),
+
+      ),
+
+      child: Text(
+
+        text,
+
+        style: TextStyle(
+
+          color: color,
+
+          fontWeight:
+              FontWeight.w600,
+
+          fontSize: 12,
+
+        ),
+
+      ),
+
+    );
+
+  }
+
+}
+
+//////////////////////////////////////////////////////////////
+// LIGNE D'INFORMATION
+//////////////////////////////////////////////////////////////
+
+class _InfoTile extends StatelessWidget {
+
+  final IconData icon;
+
+  final String title;
+
+  final String value;
+
+  const _InfoTile({
+
+    required this.icon,
+
+    required this.title,
+
+    required this.value,
+
+  });
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Row(
+
+      children: [
+
+        Icon(
+
+          icon,
+
+          size: 18,
+
+          color: Colors.grey.shade700,
+
+        ),
+
+        const SizedBox(
+
+          width: 10,
+
+        ),
+
+        Text(
+
+          "$title : ",
+
+          style: TextStyle(
+
+            color: Colors.grey.shade700,
+
+            fontWeight:
+                FontWeight.w600,
+
+          ),
+
+        ),
+
+        Expanded(
+
+          child: Text(
+
+            value,
+
+            style: const TextStyle(
+
+              fontWeight:
+
+                  FontWeight.w500,
+
+            ),
+
+          ),
+
+        ),
+
+      ],
 
     );
 

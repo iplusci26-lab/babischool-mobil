@@ -13,18 +13,19 @@ class AttendanceHistoryTile
 
     required this.history,
   });
-
+  
+  
   IconData get icon {
 
     switch (history.status) {
 
-      case "present":
+      case "PRESENT":
         return Icons.check_circle;
 
-      case "absent":
+      case "ABSENT":
         return Icons.cancel;
 
-      case "late":
+      case "LATE":
         return Icons.schedule;
 
       case "excused":
@@ -39,13 +40,13 @@ class AttendanceHistoryTile
 
     switch (history.status) {
 
-      case "present":
+      case "PRESENT":
         return Colors.green;
 
-      case "absent":
+      case "ABSENT":
         return Colors.red;
 
-      case "late":
+      case "LATE":
         return Colors.orange;
 
       case "excused":
@@ -60,13 +61,13 @@ class AttendanceHistoryTile
 
     switch (history.status) {
 
-      case "present":
+      case "PRESENT":
         return "Présent";
 
-      case "absent":
+      case "ABSENT":
         return "Absent";
 
-      case "late":
+      case "LATE":
         return "Retard";
 
       case "excused":
@@ -76,6 +77,28 @@ class AttendanceHistoryTile
         return history.status;
     }
   }
+
+  String get session {
+
+    switch (history.session) {
+
+      case "MORNING_ENTRY":
+        return "Matin avant récréation";
+
+      case "MORNING_BREAK":
+        return "Matin après récréation";
+
+      case "AFTERNOON_ENTRY":
+        return "Après-midi avant récréation";
+
+      case "AFTERNOON_BREAK":
+        return "Après-midi après récréation";
+
+      default:
+        return history.session;
+    }
+  }
+ 
 
   @override
   Widget build(
@@ -199,7 +222,18 @@ class AttendanceHistoryTile
                   ),
                 ),
 
-                if (history.status == "late")
+                Text(
+
+                  session,
+
+                  style:
+                  TextStyle(
+
+                    color:Color(0xFF6214BE),
+                  ),
+                ),
+
+                if (history.status == "LATE")
 
                   Padding(
 

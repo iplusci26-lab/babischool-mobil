@@ -1,23 +1,47 @@
 import '../../../../core/api/api_client.dart';
-import '../../../../core/api/endpoints.dart';
 
-import '../models/teacher_schedule_response.dart';
+import '../models/teacher_schedule_response_model.dart';
 
 class TeacherScheduleService {
 
-  Future<TeacherScheduleResponse> getSchedule() async {
+  const TeacherScheduleService();
+
+  //----------------------------------------------------------
+  // ENDPOINT
+  //----------------------------------------------------------
+
+  static const String _endpoint =
+      "/mobile/teacher/schedule/";
+
+  //----------------------------------------------------------
+  // EMPLOI DU TEMPS
+  //----------------------------------------------------------
+
+  Future<TeacherScheduleResponseModel>
+      getSchedule() async {
 
     final response = await ApiClient.dio.get(
 
-      Endpoints.teacherSchedule,
+      _endpoint,
 
     );
 
-    return TeacherScheduleResponse.fromJson(
+    return TeacherScheduleResponseModel.fromJson(
 
       response.data,
 
     );
+
+  }
+
+  //----------------------------------------------------------
+  // RAFRAICHIR
+  //----------------------------------------------------------
+
+  Future<TeacherScheduleResponseModel>
+      refresh() {
+
+    return getSchedule();
 
   }
 

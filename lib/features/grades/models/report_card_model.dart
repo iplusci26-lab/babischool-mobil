@@ -44,7 +44,7 @@ class ReportCardModel {
       json["students_count"],
 
       published:
-      json["published"],
+      json["published"] ?? false,
 
       remarks:
       json["remarks"] ?? "",

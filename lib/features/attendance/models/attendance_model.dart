@@ -50,6 +50,8 @@ class AttendanceHistory {
 
   final String remarks;
 
+  final String session;
+
   AttendanceHistory({
 
     required this.date,
@@ -59,6 +61,8 @@ class AttendanceHistory {
     required this.minutesLate,
 
     required this.remarks,
+
+    required this.session,
   });
 
   factory AttendanceHistory.fromJson(
@@ -78,6 +82,8 @@ class AttendanceHistory {
 
       remarks:
       json["remarks"] ?? "",
+
+      session:json["session"] ?? "",
     );
   }
 }

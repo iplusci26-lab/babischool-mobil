@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../models/profile_model.dart';
 
 class ProfileHeader extends StatelessWidget {
-
   final ProfileModel profile;
   final VoidCallback onEditAvatar;
 
@@ -11,198 +9,185 @@ class ProfileHeader extends StatelessWidget {
     super.key,
     required this.profile,
     required this.onEditAvatar,
-    
   });
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
-
       width: double.infinity,
-
-      padding:
-          const EdgeInsets.all(
-        24,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: 28,
       ),
-
       decoration: BoxDecoration(
-
-        borderRadius:
-            BorderRadius.circular(
-          24,
-        ),
-
-        gradient:
-            const LinearGradient(
-
-          begin:
-              Alignment.topLeft,
-
-          end:
-              Alignment.bottomRight,
-
-          colors: [
-
-            Color(0xff6214BE),
-
-            Color(0xff7E3AF2),
-          ],
-        ),
+        color: Color(0xff6214BE),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.05),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-
       child: Column(
-
         children: [
+          //--------------------------------------------------
+          // AVATAR
+          //--------------------------------------------------
 
           Stack(
-
-  alignment:
-      Alignment.bottomRight,
-
-  children: [
-
-            CircleAvatar(
-
-            radius: 45,
-
-            backgroundColor:
-                Colors.white,
-
-            backgroundImage:
-
-                profile.avatar != null &&
-                        profile.avatar!
-                            .isNotEmpty
-
-                    ? NetworkImage(
-                        profile.avatar!,
-                        )
-
-                    : null,
-
-            child:
-
-                profile.avatar == null ||
-                        profile.avatar!
-                            .isEmpty
-
-                    ? const Icon(
-                        Icons.person,
-                        size: 45,
-                        color: Color(
-                            0xff6214BE,
-                        ),
-                        )
-
-                    : null,
-            ),
-
-            GestureDetector(
-
-            onTap: onEditAvatar,
-
-            child: Container(
-
-                padding:
-                    const EdgeInsets.all(
-                6,
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xff6214BE),
+                    width: 2,
+                  ),
                 ),
-
-                decoration:
-                    const BoxDecoration(
-
-                color: Colors.white,
-
-                shape:
-                    BoxShape.circle,
+                child: CircleAvatar(
+                  radius: 54,
+                  backgroundColor: const Color(0xffF5F7FB),
+                  backgroundImage:
+                      profile.avatar != null &&
+                              profile.avatar!.isNotEmpty
+                          ? NetworkImage(profile.avatar!)
+                          : null,
+                  child:
+                      profile.avatar == null ||
+                              profile.avatar!.isEmpty
+                          ? const Icon(
+                              Icons.person,
+                              size: 56,
+                              color: Color(0xff6214BE),
+                            )
+                          : null,
                 ),
+              ),
 
-                child: const Icon(
-                Icons.camera_alt,
-                size: 18,
-                color: Color(
-                    0xff6214BE,
+              Positioned(
+                right: 2,
+                bottom: 2,
+                child: GestureDetector(
+                  onTap: onEditAvatar,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xff6214BE),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white,
+                        width: 2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt_rounded,
+                      size: 18,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
-                ),
-            ),
-            ),
-        ],
-        ),
-
-          const SizedBox(
-            height: 16,
+              ),
+            ],
           ),
 
-          Text(
+          const SizedBox(height: 22),
 
+          //--------------------------------------------------
+          // NOM
+          //--------------------------------------------------
+
+          Text(
             profile.fullName,
-
-            textAlign:
-                TextAlign.center,
-
-            style:
-                const TextStyle(
-
-              color:
-                  Colors.white,
-
-              fontSize: 22,
-
-              fontWeight:
-                  FontWeight.bold,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
           ),
 
-          const SizedBox(
-            height: 6,
-          ),
+          const SizedBox(height: 12),
 
-          Text(
+          //--------------------------------------------------
+          // ROLE
+          //--------------------------------------------------
 
-            profile.role ??
-                profile.userType,
-
-            style:
-                const TextStyle(
-
-              color:
-                  Colors.white70,
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 7,
+            ),
+            decoration: BoxDecoration(
+              color: const Color(0xffF3E8FF),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              profile.role ?? profile.userType,
+              style: const TextStyle(
+                color: Color(0xff6214BE),
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
 
-          const SizedBox(
-            height: 10,
+          const SizedBox(height: 24),
+
+          //--------------------------------------------------
+          // TELEPHONE
+          //--------------------------------------------------
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.phone_outlined,
+                size: 18,
+                color: Colors.white,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                profile.phone,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: Colors.white70,
+                ),
+              ),
+            ],
           ),
 
-          Text(
+          if ((profile.schoolName ?? "").isNotEmpty) ...[
+            const SizedBox(height: 14),
 
-            profile.phone,
+            //--------------------------------------------------
+            // ECOLE
+            //--------------------------------------------------
 
-            style:
-                const TextStyle(
-
-              color:
-                  Colors.white,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.school_outlined,
+                  size: 18,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    profile.schoolName!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-
-          const SizedBox(
-            height: 6,
-          ),
-
-          Text(
-
-            profile.schoolName ??
-                "",
-
-            style:
-                const TextStyle(
-
-              color:
-                  Colors.white70,
-            ),
-          ),
+          ],
         ],
       ),
     );

@@ -1,29 +1,24 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../shared/widgets/app_header.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_view.dart';
 
-import 'models/teacher_course_model.dart';
-import 'models/teacher_classrooms_response.dart';
+import 'models/teacher_assignment_model.dart';
+import 'models/teacher_classrooms_response_model.dart';
 
 import 'services/teacher_classrooms_service.dart';
 
 import 'widgets/teacher_classroom_card.dart';
-import 'widgets/teacher_classrooms_summary.dart';
 
-import '../course/teacher_course_screen.dart';
+import '../attendance/teacher_attendance_screen.dart';
 
-import '../course/attendance/teacher_attendance_screen.dart';
-import '../course/grades/teacher_grades_screen.dart';
-import '../course/homework/teacher_homeworks_screen.dart';
-import '../course/assessments/teacher_assessments_screen.dart';
 
 class TeacherClassroomsScreen extends StatefulWidget {
 
   const TeacherClassroomsScreen({
-
     super.key,
-
   });
 
   @override
@@ -32,21 +27,28 @@ class TeacherClassroomsScreen extends StatefulWidget {
 
 }
 
+
 class _TeacherClassroomsScreenState
     extends State<TeacherClassroomsScreen> {
 
-  final TeacherClassroomsService _service =
-      TeacherClassroomsService();
+  final TeacherClassroomsService service =
+      const TeacherClassroomsService();
 
-  TeacherClassroomsResponse? response;
+  TeacherClassroomsResponseModel? response;
+
+  List<TeacherAssignmentModel> assignments = [];
 
   bool loading = true;
 
   String? error;
 
-  //--------------------------------------------------------
-  // LOAD
-  //--------------------------------------------------------
+  final TextEditingController searchController =
+      TextEditingController();
+
+
+  //----------------------------------------------------------
+  // CHARGEMENT
+  //----------------------------------------------------------
 
   Future<void> loadData() async {
 
@@ -54,25 +56,251 @@ class _TeacherClassroomsScreenState
 
       error = null;
 
-      response = await _service.getClassrooms();
+      final data =
+          await service.getClassrooms();
+
+      if (!mounted) return;
+
+      setState(() {
+
+        response = data;
+
+        assignments = data.classes;
+
+        loading = false;
+
+      });
 
     } catch (e) {
 
-      error = e.toString();
+      if (!mounted) return;
+
+      setState(() {
+
+        loading = false;
+
+        error = e.toString();
+
+      });
 
     }
 
-    if (!mounted) return;
+  }
+
+
+  //----------------------------------------------------------
+  // RECHERCHE
+  //----------------------------------------------------------
+
+  void search(
+    String value,
+  ) {
+
+    if (response == null) {
+      return;
+    }
+
+    final query =
+        value.trim().toLowerCase();
+
+
+    if (query.isEmpty) {
+
+      setState(() {
+
+        assignments =
+            response!.classes;
+
+      });
+
+      return;
+
+    }
+
 
     setState(() {
 
-      loading = false;
+      assignments =
+          response!.classes.where(
+
+        (assignment) {
+
+          return assignment
+                  .classroomName
+                  .toLowerCase()
+                  .contains(query) ||
+
+              assignment
+                  .subjectName
+                  .toLowerCase()
+                  .contains(query);
+
+        },
+
+      ).toList();
 
     });
 
   }
 
-  //--------------------------------------------------------
+
+  //----------------------------------------------------------
+  // OUVRIR L'APPEL
+  //----------------------------------------------------------
+
+  void openAttendance(
+    TeacherAssignmentModel assignment,
+  ) {
+
+    //--------------------------------------------------------
+    // PRIMAIRE
+    //
+    // BY_PERIODS
+    //--------------------------------------------------------
+
+    if (assignment.isPeriodAttendance) {
+
+      Navigator.push(
+
+        context,
+
+        MaterialPageRoute(
+
+          builder: (_) =>
+              TeacherAttendanceScreen(
+
+            isPrimary:
+                true,
+
+            classroomId:
+                assignment.classroom.id,
+
+            scheduleId:
+                null,
+
+            title:
+                "Appel • ${assignment.displayName}",
+
+          ),
+
+        ),
+
+      );
+
+      return;
+
+    }
+
+
+    //--------------------------------------------------------
+    // SECONDAIRE
+    //
+    // BY_SCHEDULE
+    //--------------------------------------------------------
+
+    if (assignment.isScheduleAttendance) {
+
+      final scheduleId =
+          assignment.nextCourse?.scheduleId;
+
+
+      //------------------------------------------------------
+      // Aucun cours disponible
+      //------------------------------------------------------
+
+      if (scheduleId == null ||
+          scheduleId.trim().isEmpty) {
+
+        _showError(
+
+          "Aucun cours disponible pour cette affectation.",
+
+        );
+
+        return;
+
+      }
+
+
+      //------------------------------------------------------
+      // OUVERTURE DE L'APPEL DU COURS
+      //------------------------------------------------------
+
+      Navigator.push(
+
+        context,
+
+        MaterialPageRoute(
+
+          builder: (_) =>
+              TeacherAttendanceScreen(
+
+            isPrimary:
+                false,
+
+            classroomId:
+                null,
+
+            scheduleId:
+                scheduleId,
+
+            title:
+                "Appel • ${assignment.displayName}",
+
+          ),
+
+        ),
+
+      );
+
+      return;
+
+    }
+
+
+    //--------------------------------------------------------
+    // MODE INCONNU
+    //--------------------------------------------------------
+
+    _showError(
+
+      "Le mode de prise de présence de cette classe "
+      "n'est pas reconnu.",
+
+    );
+
+  }
+
+
+  //----------------------------------------------------------
+  // MESSAGE ERREUR
+  //----------------------------------------------------------
+
+  void _showError(
+    String message,
+  ) {
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+
+      SnackBar(
+
+        content:
+            Text(message),
+
+        backgroundColor:
+            Colors.red,
+
+      ),
+
+    );
+
+  }
+
+
+  //----------------------------------------------------------
+  // INIT
+  //----------------------------------------------------------
 
   @override
   void initState() {
@@ -83,10 +311,31 @@ class _TeacherClassroomsScreenState
 
   }
 
-  //--------------------------------------------------------
+
+  //----------------------------------------------------------
+  // DISPOSE
+  //----------------------------------------------------------
+
+  @override
+  void dispose() {
+
+    searchController.dispose();
+
+    super.dispose();
+
+  }
+
+
+  //----------------------------------------------------------
+  // BUILD
+  //----------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
+
+    //--------------------------------------------------------
+    // LOADING
+    //--------------------------------------------------------
 
     if (loading) {
 
@@ -94,11 +343,17 @@ class _TeacherClassroomsScreenState
 
     }
 
+
+    //--------------------------------------------------------
+    // ERREUR
+    //--------------------------------------------------------
+
     if (error != null) {
 
       return ErrorView(
 
-        message: error!,
+        message:
+            error!,
 
         onRetry: () {
 
@@ -116,197 +371,362 @@ class _TeacherClassroomsScreenState
 
     }
 
-    final classrooms = response!.classrooms;
 
-    final todayCourses = classrooms
+    //--------------------------------------------------------
+    // ÉCRAN
+    //--------------------------------------------------------
 
-        .where(
+    return Scaffold(
 
-          (e) => e.today,
+      backgroundColor:
+          AppColors.background,
 
-        )
+      body: RefreshIndicator(
 
-        .length;
+        onRefresh:
+            loadData,
 
-    final students = classrooms.fold<int>(
+        child: ListView(
 
-      0,
+          physics:
+              const AlwaysScrollableScrollPhysics(),
 
-      (total, item) => total + item.students,
+          padding:
+              EdgeInsets.zero,
+
+          children: [
+
+            //------------------------------------------------
+            // HEADER
+            //------------------------------------------------
+
+            const AppHeader(
+
+              title:
+                  "Mes classes",
+
+              subtitle:
+                  "Retrouvez toutes vos affectations pédagogiques.",
+
+            ),
+
+
+            Padding(
+
+              padding:
+                  const EdgeInsets.all(20),
+
+              child: Column(
+
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+
+                children: [
+
+                  //------------------------------------------------
+                  // STATISTIQUES
+                  //------------------------------------------------
+
+                  Row(
+
+                    children: [
+
+                      Expanded(
+
+                        child: _StatCard(
+
+                          title:
+                              "Classes",
+
+                          value:
+                              response!
+                                  .totalClasses
+                                  .toString(),
+
+                          icon:
+                              Icons.class_,
+
+                          color:
+                              Colors.indigo,
+
+                        ),
+
+                      ),
+
+                      const SizedBox(
+                        width: 16,
+                      ),
+
+                      Expanded(
+
+                        child: _StatCard(
+
+                          title:
+                              "Élèves",
+
+                          value:
+                              response!
+                                  .totalStudents
+                                  .toString(),
+
+                          icon:
+                              Icons.people,
+
+                          color:
+                              Colors.green,
+
+                        ),
+
+                      ),
+
+                    ],
+
+                  ),
+
+
+                  const SizedBox(
+                    height: 24,
+                  ),
+
+
+                  //------------------------------------------------
+                  // RECHERCHE
+                  //------------------------------------------------
+
+                  TextField(
+
+                    controller:
+                        searchController,
+
+                    onChanged:
+                        search,
+
+                    decoration:
+                        InputDecoration(
+
+                      hintText:
+                          "Rechercher une classe...",
+
+                      prefixIcon:
+                          const Icon(
+                        Icons.search,
+                      ),
+
+                      filled:
+                          true,
+
+                      fillColor:
+                          Colors.white,
+
+                      border:
+                          OutlineInputBorder(
+
+                        borderRadius:
+                            BorderRadius.circular(
+                          18,
+                        ),
+
+                        borderSide:
+                            BorderSide.none,
+
+                      ),
+
+                    ),
+
+                  ),
+
+
+                  const SizedBox(
+                    height: 26,
+                  ),
+
+
+                  //------------------------------------------------
+                  // TITRE
+                  //------------------------------------------------
+
+                  Text(
+
+                    "${assignments.length} affectation(s)",
+
+                    style:
+                        const TextStyle(
+
+                      fontSize:
+                          20,
+
+                      fontWeight:
+                          FontWeight.bold,
+
+                    ),
+
+                  ),
+
+
+                  const SizedBox(
+                    height: 18,
+                  ),
+
+
+                  //------------------------------------------------
+                  // LISTE
+                  //------------------------------------------------
+
+                  if (assignments.isEmpty)
+
+                    const Center(
+
+                      child: Padding(
+
+                        padding:
+                            EdgeInsets.all(60),
+
+                        child: Text(
+
+                          "Aucune classe trouvée.",
+
+                        ),
+
+                      ),
+
+                    )
+
+                  else
+
+                    ...assignments.map(
+
+                      (assignment) =>
+
+                          TeacherClassroomCard(
+
+                        assignment:
+                            assignment,
+
+                        onTap: () {
+
+                          //------------------------------------------------
+                          // APPEL
+                          //------------------------------------------------
+
+                          openAttendance(
+                            assignment,
+                          );
+
+                        },
+
+                      ),
+
+                    ),
+
+                ],
+
+              ),
+
+            ),
+
+          ],
+
+        ),
+
+      ),
 
     );
 
-    return RefreshIndicator(
+  }
 
-      onRefresh: loadData,
+}
 
-      child: ListView(
 
-        physics:
-            const AlwaysScrollableScrollPhysics(),
+//============================================================
+// STAT CARD
+//============================================================
 
-        padding: const EdgeInsets.all(20),
+class _StatCard
+    extends StatelessWidget {
+
+  final String title;
+
+  final String value;
+
+  final IconData icon;
+
+  final Color color;
+
+
+  const _StatCard({
+
+    required this.title,
+
+    required this.value,
+
+    required this.icon,
+
+    required this.color,
+
+  });
+
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Container(
+
+      padding:
+          const EdgeInsets.all(18),
+
+      decoration: BoxDecoration(
+
+        color:
+            Colors.white,
+
+        borderRadius:
+            BorderRadius.circular(20),
+
+      ),
+
+      child: Column(
 
         children: [
 
-          //--------------------------------------------------
-          // SUMMARY
-          //--------------------------------------------------
+          Icon(
 
-          TeacherClassroomsSummary(
+            icon,
 
-            teacherName: response!.teacherName,
+            color:
+                color,
 
-            classrooms: classrooms.length,
-
-            students: students,
-
-            todayCourses: todayCourses,
+            size:
+                32,
 
           ),
 
           const SizedBox(
-
-            height: 24,
-
+            height: 10,
           ),
 
-          //--------------------------------------------------
-          // LISTE DES CLASSES
-          //--------------------------------------------------
+          Text(
 
-          ...classrooms.map(
+            value,
 
-            (TeacherCourseModel classroom) {
+            style:
+                const TextStyle(
 
-              return Padding(
+              fontSize:
+                  24,
 
-                padding: const EdgeInsets.only(
+              fontWeight:
+                  FontWeight.bold,
 
-                  bottom: 18,
-
-                ),
-
-                child: TeacherClassroomCard(
-
-                  course: classroom,
-
-                  //------------------------------------------------
-                  // OUVRIR LA CLASSE
-                  //------------------------------------------------
-
-                  onTap: () {
-
-                     Navigator.push(
-
-                        context,
-
-                        MaterialPageRoute(
-
-                        builder: (_) => TeacherCourseScreen(
-
-                            classroomId: classroom.classroomId,
-                            scheduleId: classroom.scheduleId,
-                            classroomName: classroom.name,
-
-                        ),
-
-                        ),
-
-                    );
-
-
-                  },
-
-                  //------------------------------------------------
-                  // APPEL
-                  //------------------------------------------------
-
-                  onAttendance: () {
-                      print("classroomId = ${classroom.classroomId}");
-                      print("scheduleId  = ${classroom.scheduleId}");
-                    // TeacherAttendanceScreen
-                    Navigator.push(
-
-                        context,
-
-                        MaterialPageRoute(
-
-                          builder: (_) => TeacherAttendanceScreen(
-
-                            scheduleId: classroom.scheduleId,
-
-                          ),
-
-                        ),
-
-                      );
-                  },
-
-                  //------------------------------------------------
-                  // NOTES
-                  //------------------------------------------------
-
-                  onGrades: () {
-
-                    // TeacherGradesScreen
-
-                    Navigator.push(
-
-                      context,
-
-                      MaterialPageRoute(
-
-                        builder: (_) => TeacherAssessmentsScreen(
-
-                          scheduleId: classroom.scheduleId,
-
-                        ),
-
-                      ),
-
-                    );
-
-
-                  },
-
-                  //------------------------------------------------
-                  // DEVOIRS
-                  //------------------------------------------------
-
-                  onHomework: () {
-
-                    // TeacherHomeworkScreen
-                    Navigator.push(
-
-                      context,
-
-                      MaterialPageRoute(
-
-                        builder: (_) => TeacherHomeworksScreen(
-
-                          scheduleId: classroom.scheduleId,
-
-                        ),
-
-                      ),
-
-                    );
-
-                  },
-
-                ),
-
-              );
-
-            },
+            ),
 
           ),
 
           const SizedBox(
+            height: 4,
+          ),
 
-            height: 30,
-
+          Text(
+            title,
           ),
 
         ],

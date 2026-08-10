@@ -8,13 +8,14 @@ class MessagingService {
   Future<List<dynamic>>
   getConversations() async {
 
-    final response =
-
-    await ApiClient.dio.get(
+     
+    final response = await ApiClient.dio.get(
       "/messaging/conversations/",
     );
 
-    print("donee----------- ${response.data}");
+    
+
+   
 
     return response.data;
   }
@@ -24,12 +25,10 @@ class MessagingService {
     String id,
   ) async {
 
-    final response =
-
-    await ApiClient.dio.get(
+    final response = await ApiClient.dio.get(
       "/messaging/conversations/$id/",
     );
-    print(response.data);
+   
     return response.data;
   }
 

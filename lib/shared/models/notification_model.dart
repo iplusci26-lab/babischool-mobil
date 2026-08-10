@@ -14,6 +14,10 @@ class NotificationModel {
 
   final DateTime createdAt;
 
+  final String objectId;
+
+  final String targetType;
+
   NotificationModel({
 
     required this.id,
@@ -29,6 +33,10 @@ class NotificationModel {
     required this.url,
 
     required this.createdAt,
+
+    required this.objectId,
+
+    required this.targetType,
   });
 
   factory NotificationModel.fromJson(
@@ -59,6 +67,14 @@ class NotificationModel {
       DateTime.parse(
         json["created_at"],
       ),
+
+      objectId:
+        json["object_id"] ?? "",
+
+      targetType:
+          json["target_type"] ??
+          json["notification_type"],
+          
     );
   }
 }

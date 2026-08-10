@@ -2,268 +2,165 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/models/notification_model.dart';
 
-class NotificationTile
-    extends StatelessWidget {
-
+class NotificationTile extends StatelessWidget {
   final NotificationModel notification;
 
+  final VoidCallback? onTap;
+
   const NotificationTile({
-
     super.key,
-
     required this.notification,
+    this.onTap,
   });
 
   IconData get icon {
-
     switch (notification.type) {
-
       case "announcement":
-        return Icons.campaign;
+        return Icons.campaign_rounded;
 
       case "payment":
-        return Icons.payments;
+        return Icons.account_balance_wallet_rounded;
 
       case "message":
-        return Icons.chat_bubble;
+        return Icons.chat_bubble_rounded;
 
       case "attendance":
-        return Icons.check_circle;
+        return Icons.assignment_late_rounded;
 
       default:
-        return Icons.notifications;
+        return Icons.notifications_rounded;
     }
   }
 
   Color get iconColor {
-
     switch (notification.type) {
-
       case "announcement":
-        return Colors.orange;
+        return const Color(0xFF6214BE);
 
       case "payment":
-        return Colors.green;
+        return const Color(0xFF18B26B);
 
       case "message":
-        return Colors.blue;
+        return const Color(0xFF3B82F6);
 
       case "attendance":
-        return Colors.teal;
+        return const Color(0xFFFF8A00);
 
       default:
-        return const Color(
-          0xff6214BE,
-        );
+        return const Color(0xFF6214BE);
     }
   }
 
   String get timeAgo {
+    final now = DateTime.now();
 
-    final now =
-        DateTime.now();
-
-    final diff =
-        now.difference(
+    final diff = now.difference(
       notification.createdAt,
     );
 
     if (diff.inMinutes < 1) {
-
       return "à l'instant";
     }
 
     if (diff.inMinutes < 60) {
-
-      return
-      "il y a ${diff.inMinutes} min";
+      return "il y a ${diff.inMinutes} min";
     }
 
     if (diff.inHours < 24) {
-
-      return
-      "il y a ${diff.inHours} h";
+      return "il y a ${diff.inHours} h";
     }
 
-    return
-    "il y a ${diff.inDays} j";
+    return "il y a ${diff.inDays} j";
   }
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
-
-    return Container(
-
-      margin:
-      const EdgeInsets.only(
-        bottom: 14,
-      ),
-
-      padding:
-      const EdgeInsets.all(
-        16,
-      ),
-
-      decoration:
-      BoxDecoration(
-
-        color: Colors.white,
-
-        borderRadius:
-        BorderRadius.circular(
-          22,
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 8,
         ),
-
-        boxShadow: [
-
-          BoxShadow(
-
-            color:
-            Colors.black.withValues(
-              alpha: 0.05,
-            ),
-
-            blurRadius: 12,
-
-            offset:
-            const Offset(
-              0,
-              4,
-            ),
-          ),
-        ],
-      ),
-
-      child: Row(
-
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
-
-        children: [
-
-          Container(
-
-            width: 52,
-
-            height: 52,
-
-            decoration:
-            BoxDecoration(
-
-              color:
-              iconColor.withValues(
-                alpha: 0.12,
-              ),
-
-              borderRadius:
-              BorderRadius.circular(
-                16,
-              ),
-            ),
-
-            child: Icon(
-
-              icon,
-
-              color: iconColor,
-            ),
-          ),
-
-          const SizedBox(
-            width: 14,
-          ),
-
-          Expanded(
-
-            child: Column(
-
-              crossAxisAlignment:
+        child: Row(
+          crossAxisAlignment:
               CrossAxisAlignment.start,
-
-              children: [
-
-                Row(
-
-                  children: [
-
-                    Expanded(
-
-                      child: Text(
-
-                        notification.title,
-
-                        style:
-                        const TextStyle(
-
-                          fontSize: 16,
-
-                          fontWeight:
-                          FontWeight.bold,
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(.12),
+                borderRadius:
+                    BorderRadius.circular(14),
+              ),
+              child: Icon(
+                icon,
+                color: iconColor,
+                size: 26,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          notification.title,
+                          style:
+                              const TextStyle(
+                            fontSize: 15,
+                            fontWeight:
+                                FontWeight.w700,
+                          ),
                         ),
                       ),
-                    ),
-
-                    if (
-                    !notification.isRead
-                    )
-
-                    Container(
-
-                      width: 10,
-
-                      height: 10,
-
-                      decoration:
-                      const BoxDecoration(
-
-                        color: Colors.red,
-
-                        shape:
-                        BoxShape.circle,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(
-                  height: 6,
-                ),
-
-                Text(
-
-                  notification.message,
-
-                  style: TextStyle(
-
-                    color:
-                    Colors.grey.shade700,
-
-                    height: 1.4,
+                      if (!notification.isRead)
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration:
+                              const BoxDecoration(
+                            color: Colors.red,
+                            shape:
+                                BoxShape.circle,
+                          ),
+                        ),
+                    ],
                   ),
-                ),
-
-                const SizedBox(
-                  height: 10,
-                ),
-
-                Text(
-
-                  timeAgo,
-
-                  style: TextStyle(
-
-                    color:
-                    Colors.grey.shade500,
-
-                    fontSize: 12,
+                  const SizedBox(height: 4),
+                  Text(
+                    notification.message,
+                    maxLines: 2,
+                    overflow:
+                        TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color:
+                          Colors.grey.shade700,
+                      fontSize: 13,
+                      height: 1.35,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    timeAgo,
+                    style: TextStyle(
+                      color:
+                          Colors.grey.shade500,
+                      fontSize: 11,
+                      fontWeight:
+                          FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

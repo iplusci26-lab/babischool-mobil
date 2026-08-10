@@ -14,6 +14,14 @@ class StudentModel {
 
   final int unreadMessages;
 
+  final int absenceHours;
+
+  final int absenceCount;
+
+  final int lateCount;
+
+  final int presentCount;
+
   StudentModel({
 
     required this.id,
@@ -29,6 +37,14 @@ class StudentModel {
     required this.average,
 
     required this.unreadMessages,
+
+    required this.absenceHours,
+
+    required this.absenceCount,
+
+    required this.lateCount,
+
+    required this.presentCount,
   });
 
   factory StudentModel.fromJson(
@@ -61,6 +77,14 @@ class StudentModel {
 
       unreadMessages:
       json["unread_messages"] ?? 0,
+
+      absenceHours: json["absence_hours"] ?? 0,
+
+      absenceCount: json["absence_count"] ?? 0,
+
+      lateCount: json["late_count"] ?? 0,
+
+      presentCount: json["present_count"] ?? 0,
     );
   }
 }

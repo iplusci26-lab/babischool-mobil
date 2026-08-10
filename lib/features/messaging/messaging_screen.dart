@@ -4,6 +4,12 @@ import '../../core/theme/app_colors.dart';
 
 import '../../shared/models/conversation_model.dart';
 
+import '../../shared/widgets/conversation_card.dart';
+
+import '../../shared/widgets/app_header.dart';
+
+import '../../shared/widgets/app_search_bar.dart';
+
 import '../../shared/widgets/error_view.dart';
 
 import '../../shared/widgets/loading_view.dart';
@@ -14,7 +20,7 @@ import 'conversation_screen.dart';
 
 import 'messaging_service.dart';
 
-import 'widgets/conversation_tile.dart';
+
 
 class MessagingScreen
     extends StatefulWidget {
@@ -139,6 +145,9 @@ class _MessagingScreenState
     super.dispose();
   }
 
+
+  
+
   @override
   Widget build(
       BuildContext context) {
@@ -157,29 +166,7 @@ class _MessagingScreenState
       backgroundColor:
           AppColors.background,
 
-      appBar: AppBar(
-
-        elevation: 0,
-
-        backgroundColor:
-            Colors.white,
-
-        centerTitle: false,
-
-        title: const Text(
-
-          "Messagerie",
-
-          style: TextStyle(
-
-            color: Colors.black,
-
-            fontWeight:
-                FontWeight.bold,
-          ),
-        ),
-      ),
-
+    
       body: RefreshIndicator(
 
         onRefresh: loadData,
@@ -188,84 +175,34 @@ class _MessagingScreenState
 
           children: [
 
-            Container(
+            Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                child: Column(
+                  children: [
 
-              color: Colors.white,
-
-              padding:
-                  const EdgeInsets.only(
-
-                left: 20,
-
-                right: 20,
-
-                bottom: 20,
-              ),
-
-              child: Column(
-
-                crossAxisAlignment:
-                    CrossAxisAlignment
-                        .start,
-
-                children: [
-
-                  const SectionTitle(
-
-                    title:
-                        "Vos conversations",
-                  ),
-
-                  const SizedBox(
-                    height: 18,
-                  ),
-
-                  TextField(
-
-                    controller:
-                        searchController,
-
-                    onChanged:
-                        filterConversation,
-
-                    decoration:
-                        InputDecoration(
-
-                      prefixIcon:
-                          const Icon(
-                        Icons.search,
-                      ),
-
-                      hintText:
-                          "Rechercher...",
-
-                      filled: true,
-
-                      fillColor:
-                          Colors.grey
-                              .shade100,
-
-                      border:
-                          OutlineInputBorder(
-
-                        borderRadius:
-                            BorderRadius.circular(
-                          18,
-                        ),
-
-                        borderSide:
-                            BorderSide.none,
+                     AppHeader(
+                      title: "Messagerie",
+                      subtitle: "Discuter avec un personnel de l'établissement",
+                      
+                    ),
+                    const SizedBox(height: 28),
+                   
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: AppSearchBar(
+                        controller: searchController,
+                        hintText: "Rechercher une conversation...",
+                        onChanged: filterConversation,
                       ),
                     ),
-                  ),
-                ],
+
+                      const SizedBox(height: 24),
+                  ],
+                ),
               ),
-            ),
-
             Expanded(
-                            child:
-
-                  filteredConversations
+                   
+                  child:filteredConversations
                           .isEmpty
 
                       ? ListView(
@@ -350,6 +287,8 @@ class _MessagingScreenState
                             20,
                           ),
 
+                          
+
                           itemCount:
                               filteredConversations
                                   .length,
@@ -365,33 +304,54 @@ class _MessagingScreenState
                                 filteredConversations[
                                     index];
 
-                            return ConversationTile(
+                            return Padding(
 
-                              conversation:
-                                  conversation,
+                                padding: const EdgeInsets.only(bottom: 16),
 
-                              onTap: () async {
+                                child: ConversationCard(
 
-                                await Navigator.push(
+                                    name: conversation.contact.name,
 
-                                  context,
+                                    role: conversation.contact.role,
 
-                                  MaterialPageRoute(
+                                    studentName: conversation.studentName,
 
-                                    builder: (_) =>
+                                    lastMessage: conversation.lastMessage,
 
-                                        ConversationScreen(
+                                    lastMessageType: conversation.lastMessageType,
 
-                                      conversationId:
-                                          conversation.id,
-                                    ),
-                                  ),
-                                );
+                                    time: conversation.updatedTime,
 
-                                loadData();
-                              },
-                            );
-                          },
+                                    unreadCount: conversation.unreadCount,
+
+                                    avatarUrl: conversation.contact.avatar,
+
+                                    onTap: () async {
+
+                                        await Navigator.push(
+
+                                            context,
+
+                                            MaterialPageRoute(
+
+                                                builder: (_) => ConversationScreen(
+
+                                                    conversationId: conversation.id,
+
+                                                ),
+
+                                            ),
+
+                                        );
+
+                                        loadData();
+
+                                    },
+
+                                ),
+
+                              );
+                            },
                         ),
             ),
           ],

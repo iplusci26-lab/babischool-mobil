@@ -1,13 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+
+import '../../core/realtime/payment_realtime_service.dart';
+import '../../core/theme/app_colors.dart';
+import '../../shared/widgets/app_header.dart';
 
 import '../payments/models/child_finance_model.dart';
 import '../payments/models/finance_summary_model.dart';
 
 import '../payments/services/payment_service.dart';
 
-import '../payments/widgets/finance_summary_card.dart';
 import '../payments/widgets/child_payment_card.dart';
+import '../payments/widgets/finance_summary_card.dart';
 import '../payments/widgets/payment_history_card.dart';
+
 import 'payment_history_screen.dart';
 
 class PaymentsScreen extends StatefulWidget {
@@ -19,6 +26,7 @@ class PaymentsScreen extends StatefulWidget {
   @override
   State<PaymentsScreen> createState() =>
       _PaymentsScreenState();
+
 }
 
 class _PaymentsScreenState
@@ -30,6 +38,8 @@ class _PaymentsScreenState
   FinanceSummaryModel? summary;
 
   bool loading = true;
+
+  StreamSubscription? _paymentSubscription;
 
   //-------------------------------------------------------
   // Chargement
@@ -67,7 +77,7 @@ class _PaymentsScreenState
   }
 
   //-------------------------------------------------------
-  // Changement enfant
+  // Changement d'enfant
   //-------------------------------------------------------
 
   Future<void> changeChild(
@@ -107,6 +117,32 @@ class _PaymentsScreenState
   }
 
   //-------------------------------------------------------
+  // Temps réel
+  //-------------------------------------------------------
+
+  void _listenRealtime() {
+
+    _paymentSubscription =
+
+        PaymentRealtimeService.instance.stream.listen(
+
+      (_) async {
+
+        debugPrint(
+
+          "========== PAYMENT REALTIME ==========",
+
+        );
+
+        await loadData();
+
+      },
+
+    );
+
+  }
+
+  //-------------------------------------------------------
 
   @override
   void initState() {
@@ -114,6 +150,19 @@ class _PaymentsScreenState
     super.initState();
 
     loadData();
+
+    _listenRealtime();
+
+  }
+
+  //-------------------------------------------------------
+
+  @override
+  void dispose() {
+
+    _paymentSubscription?.cancel();
+
+    super.dispose();
 
   }
 
@@ -157,7 +206,7 @@ class _PaymentsScreenState
     return Scaffold(
 
       backgroundColor:
-          const Color(0xffF7F8FC),
+          AppColors.background,
 
       body: RefreshIndicator(
 
@@ -168,120 +217,149 @@ class _PaymentsScreenState
           physics:
               const AlwaysScrollableScrollPhysics(),
 
-          padding:
-              const EdgeInsets.fromLTRB(
-
-            22,
-
-            24,
-
-            22,
-
-            30,
-
+          padding: const EdgeInsets.only(
+            bottom: 30,
           ),
 
           children: [
-                      //--------------------------------------------------
-          // HEADER
-          //--------------------------------------------------
 
-          Container(
+            //--------------------------------------------------
+            // HEADER
+            //--------------------------------------------------
 
-            padding: const EdgeInsets.all(22),
+            const AppHeader(
 
-            decoration: BoxDecoration(
+              title: "Paiements",
 
-              gradient: const LinearGradient(
-
-                colors: [
-
-                  Color(0xff6214BE),
-
-                  Color(0xff8455F8),
-
-                ],
-
-                begin: Alignment.topLeft,
-
-                end: Alignment.bottomRight,
-
-              ),
-
-              borderRadius:
-                  BorderRadius.circular(28),
+              subtitle:
+                  "Suivez la scolarité de vos enfants",
 
             ),
 
-            child: Row(
+            const SizedBox(height: 28),
 
-              children: [
+            Padding(
 
-                Container(
+              padding:
+                  const EdgeInsets.symmetric(
 
-                  width: 62,
+                horizontal: 22,
 
-                  height: 62,
+              ),
 
-                  decoration: BoxDecoration(
+              child: Column(
 
-                    color: Colors.white,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
 
-                    borderRadius:
-                        BorderRadius.circular(18),
+                children: [
+
+                  Text(
+
+                    summary!.studentName,
+
+                    style: const TextStyle(
+
+                      fontSize: 24,
+
+                      fontWeight:
+                          FontWeight.bold,
+
+                    ),
 
                   ),
 
-                  child: const Icon(
+                  const SizedBox(height: 20),
 
-                    Icons.account_balance_wallet_rounded,
+                  //--------------------------------------------------
+                  // SYNTHÈSE
+                  //--------------------------------------------------
 
-                    color: Color(0xff6214BE),
+                  AnimatedSwitcher(
 
-                    size: 34,
+                    duration:
+                        const Duration(
+
+                      milliseconds: 350,
+
+                    ),
+
+                    child:
+                        FinanceSummaryCard(
+
+                      key: ValueKey(
+
+                        summary!.studentId,
+
+                      ),
+
+                      summary: summary!,
+
+                    ),
 
                   ),
 
-                ),
+                  const SizedBox(height: 34),
 
-                const SizedBox(width: 18),
+                  //--------------------------------------------------
+                  // ENFANTS
+                  //--------------------------------------------------
 
-                const Expanded(
+                  Row(
 
-                  child: Column(
-
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    mainAxisAlignment:
+                        MainAxisAlignment.spaceBetween,
 
                     children: [
 
-                      Text(
+                      const Text(
 
-                        "Paiements",
+                        "Mes enfants",
 
                         style: TextStyle(
 
-                          color: Colors.white,
+                          fontSize: 22,
 
-                          fontWeight: FontWeight.bold,
-
-                          fontSize: 30,
+                          fontWeight:
+                              FontWeight.bold,
 
                         ),
 
                       ),
 
-                      SizedBox(height: 6),
+                      TextButton.icon(
 
-                      Text(
+                        onPressed: () {
 
-                        "Suivez la scolarité de vos enfants",
+                          ScaffoldMessenger.of(context)
 
-                        style: TextStyle(
+                              .showSnackBar(
 
-                          color: Colors.white70,
+                            const SnackBar(
 
-                          fontSize: 15,
+                              content: Text(
+
+                                "Tous vos enfants sont déjà affichés.",
+
+                              ),
+
+                            ),
+
+                          );
+
+                        },
+
+                        icon: const Icon(
+
+                          Icons.info_outline,
+
+                          size: 15,
+
+                        ),
+
+                        label: const Text(
+
+                          "Voir tout",
 
                         ),
 
@@ -291,283 +369,148 @@ class _PaymentsScreenState
 
                   ),
 
-                ),
+                  const SizedBox(height: 14),
 
-                Container(
+                  ...summary!.children.map(
 
-                  width: 52,
+                    (child) =>
 
-                  height: 52,
+                        ChildPaymentCard(
 
-                  decoration: BoxDecoration(
+                      child: child,
 
-                    color: Colors.white,
+                      activeChildId:
+                          summary!.studentId,
 
-                    borderRadius:
-                        BorderRadius.circular(16),
+                      onTap: () {
 
-                  ),
+                        changeChild(child);
 
-                  child: const Icon(
+                      },
 
-                    Icons.notifications_none,
-
-                    color: Color(0xff6214BE),
+                    ),
 
                   ),
 
-                ),
+                  const SizedBox(height: 30),
 
-              ],
+                  //--------------------------------------------------
+                  // HISTORIQUE
+                  //--------------------------------------------------
 
-            ),
+                  Row(
 
-          ),
+                    mainAxisAlignment:
+                        MainAxisAlignment.spaceBetween,
 
-          const SizedBox(height: 28),
+                    children: [
 
-          //--------------------------------------------------
-          // ETUDIANT ACTIF
-          //--------------------------------------------------
+                      const Text(
 
-          Text(
+                        "Derniers paiements",
 
-            summary!.studentName,
+                        style: TextStyle(
 
-            style: const TextStyle(
+                          fontSize: 22,
 
-              fontSize: 24,
-
-              fontWeight: FontWeight.bold,
-
-            ),
-
-          ),
-
-          const SizedBox(height: 20),
-
-          //--------------------------------------------------
-          // CARTE DE SYNTHESE
-          //--------------------------------------------------
-
-          AnimatedSwitcher(
-
-            duration: const Duration(
-
-              milliseconds: 350,
-
-            ),
-
-            child: FinanceSummaryCard(
-
-              key: ValueKey(
-
-                summary!.studentId,
-
-              ),
-
-              summary: summary!,
-
-            ),
-
-          ),
-
-          const SizedBox(height: 34),
-
-          //--------------------------------------------------
-          // ENFANTS
-          //--------------------------------------------------
-
-          Row(
-
-            mainAxisAlignment:
-
-                MainAxisAlignment.spaceBetween,
-
-            children: [
-
-              const Text(
-
-                "Mes enfants",
-
-                style: TextStyle(
-
-                  fontSize: 22,
-
-                  fontWeight: FontWeight.bold,
-
-                ),
-
-              ),
-
-              TextButton.icon(
-
-                onPressed: () {
-                   ScaffoldMessenger.of(context).showSnackBar(
-
-                      const SnackBar(
-
-                        content: Text(
-
-                          "Tous vos enfants sont déjà affichés.",
+                          fontWeight:
+                              FontWeight.bold,
 
                         ),
 
                       ),
 
-                    );
-                },
+                      if (summary!
+                              .payments.length >
+                          5)
 
-                icon: const Icon(
+                        TextButton.icon(
 
-                  Icons.info_outline,
+                          onPressed: () {
 
-                  size: 15,
+                            Navigator.push(
 
-                ),
+                              context,
 
-                label: const Text(
+                              MaterialPageRoute(
 
-                  "Voir tout",
+                                builder: (_) =>
 
-                ),
+                                    PaymentHistoryScreen(
 
-              ),
+                                  payments: summary!
+                                      .payments,
 
-            ],
+                                ),
 
-          ),
+                              ),
 
-          const SizedBox(height: 14),
+                            );
 
-          ...summary!.children.map(
+                          },
 
-            (child) => ChildPaymentCard(
+                          icon: const Icon(
 
-              child: child,
+                            Icons.arrow_forward_ios,
 
-              activeChildId:
-                  summary!.studentId,
+                            size: 15,
 
-              onTap: () {
+                          ),
 
-                changeChild(child);
+                          label: const Text(
 
-              },
+                            "Voir tout",
 
-            ),
+                          ),
 
-          ),
+                        ),
 
-          const SizedBox(height: 30),
+                    ],
 
-          //--------------------------------------------------
-          // HISTORIQUE
-          //--------------------------------------------------
+                  ),
 
-          Row(
+                  const SizedBox(height: 16),
 
-            mainAxisAlignment:
+                  ...summary!.payments
 
-                MainAxisAlignment.spaceBetween,
+                      .take(5)
 
-            children: [
+                      .map(
 
-              const Text(
+                        (payment) => Padding(
 
-                "Derniers paiements",
+                          padding:
+                              const EdgeInsets.only(
 
-                style: TextStyle(
+                            bottom: 14,
 
-                  fontSize: 22,
+                          ),
 
-                  fontWeight: FontWeight.bold,
+                          child:
+                              PaymentHistoryCard(
 
-                ),
+                            payment: payment,
 
-              ),
-              if (summary!.payments.length > 5)
-              TextButton.icon(
+                          ),
 
-                onPressed: () {
-                  Navigator.push(
+                        ),
 
-                    context,
+                      ),
 
-                    MaterialPageRoute(
-
-                      builder: (_) =>
-
-                           PaymentHistoryScreen(
-
-                              payments: summary!.payments,
-
-                            ),
-
-                    ),
-
-                  );
-                },
-
-                icon: const Icon(
-
-                  Icons.arrow_forward_ios,
-
-                  size: 15,
-
-                ),
-
-                label: const Text(
-
-                  "Voir tout",
-
-                ),
-
-              ),
-
-            ],
-
-          ),
-
-          const SizedBox(
-
-            height: 16,
-
-          ),
-
-          ...summary!.payments
-
-            .take(5)
-
-            .map(
-
-              (payment) => Padding(
-
-                padding: const EdgeInsets.only(
-
-                  bottom: 14,
-
-                ),
-
-                child: PaymentHistoryCard(
-
-                  payment: payment,
-
-                ),
+                ],
 
               ),
 
             ),
 
-         
-        ],
+          ],
+
+        ),
 
       ),
 
-    ),
+    );
 
-  );
-
-}
+  }
 
 }

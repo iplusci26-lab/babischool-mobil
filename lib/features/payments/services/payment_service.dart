@@ -11,7 +11,7 @@ class PaymentService {
         await ApiClient.dio.get(
       "/mobile/payments/",
     );
-    print("reponse----- $response.data");
+    
     return FinanceSummaryModel
         .fromJson(
       response.data,

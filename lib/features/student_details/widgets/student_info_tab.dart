@@ -116,10 +116,10 @@ extends StatelessWidget {
                 student.classroom,
               ),
 
-              _InfoRow(
+             /* _InfoRow(
                 "Cycle",
                 student.cycle,
-              ),
+              ),*/
             ],
           ),
         ),

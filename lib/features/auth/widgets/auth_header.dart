@@ -1,98 +1,58 @@
 import 'package:flutter/material.dart';
 
 class AuthHeader extends StatelessWidget {
-
   const AuthHeader({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
-
       children: [
 
         Container(
-
-          height: 90,
-
-          width: 90,
-
+          height: 120,
+          width: 120,
           decoration: BoxDecoration(
-
             color: Colors.white,
-
-            borderRadius: BorderRadius.circular(25),
-
+            borderRadius: BorderRadius.circular(26),
             boxShadow: const [
-
               BoxShadow(
-
-                blurRadius: 20,
-
                 color: Colors.black12,
-
-                offset: Offset(0, 8),
-
+                blurRadius: 25,
+                offset: Offset(0, 10),
               ),
-
             ],
-
           ),
-
-          child: const Icon(
-
-            Icons.school_rounded,
-
-            color: Color(0xff6214BE),
-
-            size: 52,
-
+          clipBehavior: Clip.antiAlias,
+          child: Image.asset(
+            "assets/images/babischool_logo.png",
+            fit: BoxFit.cover,
           ),
-
         ),
 
         const SizedBox(height: 24),
 
         const Text(
-
-          "BABISCHOOL",
-
+          "Bon retour !",
           style: TextStyle(
-
-            fontSize: 34,
-
+            fontSize: 28,
             fontWeight: FontWeight.bold,
-
             color: Colors.white,
-
-            letterSpacing: 2,
-
           ),
-
         ),
 
         const SizedBox(height: 8),
 
         const Text(
-
-          "La plateforme scolaire intelligente",
-
+          "Connectez-vous à votre espace",
           style: TextStyle(
-
             color: Colors.white70,
-
             fontSize: 16,
-
           ),
-
+          textAlign: TextAlign.center,
         ),
-
       ],
-
     );
-
   }
-
 }

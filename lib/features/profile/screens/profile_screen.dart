@@ -8,6 +8,8 @@ import '../widgets/profile_header.dart';
 import '../widgets/profile_menu_tile.dart';
 import 'change_password_screen.dart';
 import '../../auth/services/auth_service.dart';
+import '../../../shared/widgets/app_header.dart';
+import '../../../core/theme/app_colors.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
@@ -87,148 +89,144 @@ class _ProfileScreenState
       );
     }
 
-    return Scaffold(
-      backgroundColor:
-          const Color(0xffF7F8FA),
+   return Scaffold(
+  backgroundColor: AppColors.background,
 
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor:
-            Colors.transparent,
-        title: const Text(
-          "Mon profil",
-        ),
-      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
 
-      body: SingleChildScrollView(
-        padding:
-            const EdgeInsets.all(20),
+              const AppHeader(
+                title: "Mon profil",
+                subtitle: "Gérez votre compte et vos préférences",
+              ),
 
-        child: Column(
-          children: [
+              const SizedBox(height: 28),
 
-            /// HEADER
-            ProfileHeader(
-            profile: profile!,
-            onEditAvatar: pickAvatar,
-          ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
 
-            const SizedBox(
-              height: 24,
-            ),
-
-            _buildTile(
-              icon:
-                  Icons.person_outline,
-              title:
-                  "Informations personnelles",
-              onTap: () async {
-                final result =
-                  await Navigator.push(
-
-                context,
-
-                MaterialPageRoute(
-                  builder: (_) =>
-                      EditProfileScreen(
-                    profile: profile!,
-                  ),
-                ),
-              );
-
-              if (result == true) {
-                loadProfile();
-              }
-              },
-            ),
-
-            _buildTile(
-              icon:
-                  Icons.lock_outline,
-              title:
-                  "Changer le mot de passe",
-              onTap: () {
-                Navigator.push(
-
-                  context,
-
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        const ChangePasswordScreen(),
-                  ),
-                );
-              },
-            ),
-
-            _buildTile(
-              icon: Icons
-                  .notifications_outlined,
-              title:
-                  "Notifications",
-              onTap: () {},
-            ),
-
-            _buildTile(
-              icon:
-                  Icons.help_outline,
-              title:
-                  "Aide & Support",
-              onTap: () {},
-            ),
-
-            const SizedBox(
-              height: 24,
-            ),
-
-            SizedBox(
-              width:
-                  double.infinity,
-
-              child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    /// HEADER
+                    ProfileHeader(
+                      profile: profile!,
+                      onEditAvatar: pickAvatar,
                     ),
-                    onPressed: () async {
 
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          title: const Text("Déconnexion"),
-                          content: const Text(
-                            "Voulez-vous vraiment vous déconnecter ?",
+                    const SizedBox(height: 24),
+
+                    _buildTile(
+                      icon: Icons.person_outline,
+                      title: "Informations personnelles",
+                      onTap: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => EditProfileScreen(
+                              profile: profile!,
+                            ),
                           ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: const Text("Annuler"),
-                            ),
-                            FilledButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text("Déconnexion"),
-                            ),
-                          ],
-                        ),
-                      );
+                        );
 
-                      if (confirm == true) {
-                        await AuthService.logout(context);
-                      }
-                    },
-                    icon: const Icon(
-                      Icons.logout,
-                      color: Colors.white,
+                        if (result == true) {
+                          loadProfile();
+                        }
+                      },
                     ),
-                    label: const Text(
-                      "Déconnexion",
-                      style: TextStyle(
-                        color: Colors.white,
+
+                    _buildTile(
+                      icon: Icons.lock_outline,
+                      title: "Changer le mot de passe",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const ChangePasswordScreen(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    _buildTile(
+                      icon: Icons.notifications_outlined,
+                      title: "Notifications",
+                      onTap: () {},
+                    ),
+
+                    _buildTile(
+                      icon: Icons.help_outline,
+                      title: "Aide & Support",
+                      onTap: () {},
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 14,
+                          ),
+                        ),
+                        onPressed: () async {
+                          final confirm =
+                              await showDialog<bool>(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              title: const Text("Déconnexion"),
+                              content: const Text(
+                                "Voulez-vous vraiment vous déconnecter ?",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(
+                                    context,
+                                    false,
+                                  ),
+                                  child: const Text("Annuler"),
+                                ),
+                                FilledButton(
+                                  onPressed: () =>
+                                      Navigator.pop(
+                                    context,
+                                    true,
+                                  ),
+                                  child:
+                                      const Text("Déconnexion"),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirm == true) {
+                            await AuthService.logout(
+                              context,
+                            );
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.logout,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          "Déconnexion",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
-                  )
-            ),
-          ],
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

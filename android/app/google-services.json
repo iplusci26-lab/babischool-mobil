@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "318959128833",
+    "project_id": "babischool-90241",
+    "storage_bucket": "babischool-90241.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:318959128833:android:1a044b6901dd9a061ecb00",
+        "android_client_info": {
+          "package_name": "com.example.babischool_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_UdAat8fp1vrfvjatmc6tTNYlhlDBGwY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,3 +1,4 @@
+import '../../features/dashboard/models/activity_model.dart';
 import 'student_model.dart';
 
 class DashboardModel {
@@ -6,11 +7,15 @@ class DashboardModel {
 
   final List<StudentModel> students;
 
+  final List<ActivityModel> activities;
+
   DashboardModel({
 
     required this.parentName,
 
     required this.students,
+
+    required this.activities,
   });
 
   factory DashboardModel.fromJson(
@@ -29,6 +34,17 @@ class DashboardModel {
               .map(
                 (e) =>
                     StudentModel.fromJson(e),
+              )
+
+              .toList(),
+
+      activities:
+
+          (json["activities"] as List)
+
+              .map(
+                (e) =>
+                    ActivityModel.fromJson(e),
               )
 
               .toList(),

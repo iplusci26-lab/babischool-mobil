@@ -108,23 +108,23 @@ class _StudentDetailsScreenState
               ),
 
               Tab(
-                text: "Devoirs programmés"
+                text: "Exercices d'application"
               ),
 
               Tab(
-                text: "Emploi du temps",
+                text: "Emplois du temps",
               ),
 
               Tab(
-                text: "Présence",
+                text: "Présences",
               ),
 
               Tab(
-                text: "Finances",
+                text: "Paiements",
               ),
 
               Tab(
-                text: "Infos",
+                text: "Profil enfant",
               ),
             ],
           ),

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../shared/models/student_model.dart';
 
-class ChildrenSection
-extends StatelessWidget {
-
+class ChildrenSection extends StatelessWidget {
   final List<StudentModel> students;
-  final Function(StudentModel student,) onStudentTap;
+  final Function(StudentModel student) onStudentTap;
 
   const ChildrenSection({
     super.key,
@@ -15,143 +13,307 @@ extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      children: students.map((student) {
+        final double average = student.average;
+        //--------------------------------------------------
+        // Couleur des absences
+        //--------------------------------------------------
 
-    return Container(
+        final int absenceHours = student.absenceHours;
 
-      padding: const EdgeInsets.all(20),
+        Color indicatorColor;
 
-      decoration: BoxDecoration(
+        String indicatorLabel;
 
-        borderRadius:
-        BorderRadius.circular(24),
+        IconData indicatorIcon;
 
-        gradient: const LinearGradient(
+        if (absenceHours == 0) {
 
-          colors: [
+          indicatorColor = Colors.green;
 
-            Color(0xff6214BE),
+          indicatorLabel = "Excellent";
 
-            Color(0xff7B3FF2),
-          ],
-        ),
-      ),
+          indicatorIcon = Icons.verified_rounded;
 
-      child: Column(
+        }
+        else if (absenceHours <= 5) {
 
-        children: students.map((student) {
+          indicatorColor = Colors.orange;
 
-          return GestureDetector(
-            onTap: () {
+          indicatorLabel = "À surveiller";
 
-                onStudentTap(
-                student,
-                );
-            },
-          child: Padding(
+          indicatorIcon = Icons.visibility_rounded;
 
-            padding:
-            const EdgeInsets.only(
-              bottom: 16,
-            ),
+        }
+        else if (absenceHours <= 10) {
 
-            child: Row(
+          indicatorColor = Colors.deepOrange;
 
-              children: [
+          indicatorLabel = "Attention";
 
-                CircleAvatar(
+          indicatorIcon = Icons.warning_amber_rounded;
 
-                  radius: 24,
+        }
+        else {
 
-                  child: Text(
-                    student.name[0],
-                  ),
-                ),
+          indicatorColor = Colors.red;
 
-                const SizedBox(
-                  width: 12,
-                ),
+          indicatorLabel = "Critique";
 
-                Expanded(
+          indicatorIcon = Icons.error_outline_rounded;
 
-                  child: Column(
+        }
 
-                    crossAxisAlignment:
-                    CrossAxisAlignment.start,
+         //--------------------------------------------------
+        // Couleur de la moyenne
+        //--------------------------------------------------
+        Color averageColor;
 
-                    children: [
+        if (average < 10) {
+          averageColor = Colors.red;
+        } else if (average <= 12) {
+          averageColor = Colors.orange;
+        } else {
+          averageColor = Colors.green;
+        }
 
-                      Text(
-
-                        student.name,
-
-                        style:
-                        const TextStyle(
-
-                          color: Colors.white,
-
-                          fontWeight:
-                          FontWeight.bold,
-                        ),
-                      ),
-
-                      Text(
-
-                        student.classroom,
-
-                        style:
-                        const TextStyle(
-
-                          color:
-                          Colors.white70,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                Container(
-
-                  width: 55,
-
-                  height: 55,
-
-                  decoration:
-                  BoxDecoration(
-
-                    shape:
-                    BoxShape.circle,
-
-                    color:
-                    Colors.white24,
-                  ),
-
-                  child: Center(
-
-                    child: Text(
-
-                      student.average
-                          .toStringAsFixed(
-                        1,
-                      ),
-
-                      style:
-                      const TextStyle(
-
-                        color:
-                        Colors.white,
-
-                        fontWeight:
-                        FontWeight.bold,
-                      ),
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: Material(
+            color: Colors.white,
+            elevation: 2,
+            borderRadius: BorderRadius.circular(22),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(22),
+              onTap: () => onStudentTap(student),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border(
+                    left: BorderSide(
+                      color: averageColor,
+                      width: 5,
                     ),
                   ),
                 ),
-              ],
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Row(
+                    children: [
+                      //--------------------------------------------------
+                      // Avatar
+                      //--------------------------------------------------
+
+                      CircleAvatar(
+                        radius: 28,
+                        backgroundColor:
+                            const Color(0xff6214BE).withOpacity(.12),
+                        child: Text(
+                          student.name[0].toUpperCase(),
+                          style: const TextStyle(
+                            color: Color(0xff6214BE),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 16),
+
+                      //--------------------------------------------------
+                      // Informations
+                      //--------------------------------------------------
+
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              student.name,
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xff1F2937),
+                              ),
+                            ),
+
+                            const SizedBox(height: 4),
+
+                            Text(
+                              student.classroom,
+                              style: const TextStyle(
+                                color: Colors.grey,
+                              ),
+                            ),
+
+                            const SizedBox(height: 8),
+                              //--------------------------------------------------
+                              // Moyenne
+                              //--------------------------------------------------
+                              Row(
+                                children: [
+
+                                  const Icon(
+                                    Icons.school_rounded,
+                                    size: 16,
+                                    color: Color(0xff6214BE),
+                                  ),
+
+                                  const SizedBox(width: 5),
+
+                                  Text(
+                                    "Moyenne : ${average.toStringAsFixed(1)}/20",
+                                    style: const TextStyle(
+                                      color: Color(0xff6214BE),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+
+                                ],
+                              ),
+
+
+                            const SizedBox(height: 10),
+
+                            const Row(
+                              children: [
+                                Text(
+                                  "Voir le détail",
+                                  style: TextStyle(
+                                    color: Color(0xff6214BE),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+
+                                SizedBox(width: 4),
+
+                                Icon(
+                                  Icons.arrow_forward_rounded,
+                                  size: 18,
+                                  color: Color(0xff6214BE),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      
+                      
+                      Column(
+
+                        children: [
+
+                          Container(
+
+                            width: 76,
+
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 8,
+                            ),
+
+                            decoration: BoxDecoration(
+
+                              color: indicatorColor,
+
+                              borderRadius:
+                                  BorderRadius.circular(18),
+
+                            ),
+
+                            child: Column(
+
+                              children: [
+
+                                Text(
+
+                                  "${absenceHours} h",
+
+                                  style: const TextStyle(
+
+                                    color: Colors.white,
+
+                                    fontWeight: FontWeight.bold,
+
+                                    fontSize: 20,
+
+                                  ),
+
+                                ),
+
+                                const SizedBox(height: 4),
+
+                                const Text(
+
+                                  "Absences",
+
+                                  textAlign: TextAlign.center,
+
+                                  style: TextStyle(
+
+                                    color: Colors.white,
+
+                                    fontSize: 11,
+
+                                    fontWeight: FontWeight.w600,
+
+                                  ),
+
+                                ),
+
+                                const SizedBox(height: 8),
+
+                                Icon(
+
+                                  indicatorIcon,
+
+                                  color: Colors.white,
+
+                                  size: 18,
+
+                                ),
+
+                                const SizedBox(height: 3),
+
+                                Text(
+
+                                  indicatorLabel,
+
+                                  textAlign: TextAlign.center,
+
+                                  style: const TextStyle(
+
+                                    color: Colors.white,
+
+                                    fontSize: 10,
+
+                                    fontWeight: FontWeight.w600,
+
+                                  ),
+
+                                ),
+
+                              ],
+
+                            ),
+
+                          ),
+
+                        ],
+
+                      ),
+
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
-          );
-        }).toList(),
-      ),
+        );
+      }).toList(),
     );
   }
 }

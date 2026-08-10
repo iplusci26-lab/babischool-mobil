@@ -6,12 +6,7 @@ class DashboardService {
 
   Future<Map<String,dynamic>>
   getDashboard() async {
-    
-    print(
-      "DASHBOARD service =>"
-    );
-
-
+   
     final response =
     await ApiClient.dio.get(
       Endpoints.dashboard,
@@ -21,6 +16,7 @@ class DashboardService {
       "DASHBOARD RESPONSE => ${response.data}"
     );
 
+    
     return response.data;
   }
 }

@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../core/storage/secure_storage_service.dart';
 
-import '../../shared/shells/parent/parent_shell.dart';
 import '../../shared/shells/staff/staff_shell.dart';
+
 import '../../shared/shells/teacher/teacher_shell.dart';
+
+import '../../core/notifications/notification_service.dart';
+
+import 'package:babischool_mobile/shared/shells/parent/parent_shell.dart';
 
 import 'login_screen.dart';
 
@@ -103,6 +107,29 @@ class _SplashScreenState
       return;
 
     }
+    //--------------------------------------------------
+    // ENREGISTREMENT DE L'APPAREIL
+    //--------------------------------------------------
+
+    
+      if (!mounted) return;
+
+      setState(() {
+        status = "Activation des notifications...";
+      });
+
+      try {
+
+        await NotificationService.instance.registerDevice();
+
+      } catch (e) {
+
+        debugPrint(
+          "Notification registration error : $e",
+        );
+
+      }
+
 
     await Future.delayed(
 
@@ -211,7 +238,9 @@ class _SplashScreenState
 
         navigate(
 
-          const ParentShell(),
+          ParentShell(
+            key: parentShellKey,
+          ),
 
         );
 
@@ -336,65 +365,25 @@ class _SplashScreenState
                     },
 
                     child: Container(
-
-                      height: 110,
-
-                      width: 110,
-
-                      decoration:
-
-                          BoxDecoration(
-
-                        color:
-                            Colors.white,
-
-                        borderRadius:
-
-                            BorderRadius.circular(
-
-                          28,
-
-                        ),
-
-                        boxShadow: const [
-
-                          BoxShadow(
-
-                            color:
-
-                                Colors.black26,
-
-                            blurRadius: 30,
-
-                            offset:
-
-                                Offset(
-
-                              0,
-
-                              10,
-
+                        height: 140,
+                        width: 140,
+                        decoration: BoxDecoration(
+                          color: Color(0xff6214BE),
+                          borderRadius: BorderRadius.circular(28),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 30,
+                              offset: Offset(0, 10),
                             ),
-
-                          ),
-
-                        ],
-
-                      ),
-
-                      child: const Icon(
-
-                        Icons.school_rounded,
-
-                        size: 60,
-
-                        color: Color(
-                          0xff6214BE,
+                          ],
                         ),
-
+                        clipBehavior: Clip.antiAlias,
+                        child: Image.asset(
+                          "assets/images/babischool_logo.png",
+                          fit: BoxFit.cover,
+                        ),
                       ),
-
-                    ),
 
                   ),
 
@@ -402,7 +391,7 @@ class _SplashScreenState
                     height: 30,
                   ),
 
-                  const Text(
+                  /*const Text(
 
                     "BABISCHOOL",
 
@@ -441,10 +430,10 @@ class _SplashScreenState
                     textAlign:
                         TextAlign.center,
 
-                  ),
+                  ),*/
 
                   const SizedBox(
-                    height: 70,
+                    height: 60,
                   ),
 
                   AnimatedSwitcher(

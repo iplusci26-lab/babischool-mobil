@@ -1,22 +1,47 @@
 import '../../../../core/api/api_client.dart';
 
-import '../models/teacher_classrooms_response.dart';
+import '../models/teacher_classrooms_response_model.dart';
 
 class TeacherClassroomsService {
 
-  Future<TeacherClassroomsResponse> getClassrooms() async {
+  const TeacherClassroomsService();
+
+  //----------------------------------------------------------
+  // ENDPOINT
+  //----------------------------------------------------------
+
+  static const String _endpoint =
+      "/mobile/teacher/classrooms/";
+
+  //----------------------------------------------------------
+  // MES CLASSES
+  //----------------------------------------------------------
+
+  Future<TeacherClassroomsResponseModel>
+      getClassrooms() async {
 
     final response = await ApiClient.dio.get(
 
-      "/mobile/teacher/classrooms/",
+      _endpoint,
 
     );
-    print("response data $response.data");
-    return TeacherClassroomsResponse.fromJson(
+
+    return TeacherClassroomsResponseModel.fromJson(
 
       response.data,
 
     );
+
+  }
+
+  //----------------------------------------------------------
+  // RAFRAICHIR
+  //----------------------------------------------------------
+
+  Future<TeacherClassroomsResponseModel>
+      refresh() {
+
+    return getClassrooms();
 
   }
 

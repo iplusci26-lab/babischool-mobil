@@ -20,6 +20,34 @@ class ScheduleSummaryCard extends StatelessWidget {
 
   });
 
+  String get weekday {
+
+    switch (today) {
+
+      case "MONDY":
+        return "Lundi";
+
+      case "TUESDAY":
+        return "Mardi";
+
+      case "WEDNESDAY":
+        return "Mercredi";
+
+      case "THURSDAY":
+        return "Jeudi";
+      
+      case "FRIDAY":
+        return "Vendredi";
+
+      
+      case "SATURDAY":
+        return "Samedi";
+
+      default:
+        return today;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -137,7 +165,7 @@ class ScheduleSummaryCard extends StatelessWidget {
 
                     Text(
 
-                      today,
+                      weekday,
 
                       style: const TextStyle(
 

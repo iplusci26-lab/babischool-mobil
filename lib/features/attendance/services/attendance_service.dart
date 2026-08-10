@@ -15,7 +15,7 @@ class AttendanceService {
 
       "/mobile/students/$studentId/attendance/",
     );
-
+    print("-------------- ${response.data}");
     return AttendanceModel.fromJson(
       response.data,
     );
