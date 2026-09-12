@@ -61,25 +61,25 @@ class AttendanceSessionSelector extends StatelessWidget {
 
     {
       "value": "MORNING_ENTRY",
-      "label": "Entrée matin",
+      "label": "Matin",
       "description": "Avant la récréation",
     },
 
     {
       "value": "MORNING_BREAK",
-      "label": "Retour récréation matin",
+      "label": "Matin",
       "description": "Après la récréation",
     },
 
     {
       "value": "AFTERNOON_ENTRY",
-      "label": "Entrée après-midi",
-      "description": "Après la pause déjeuner",
+      "label": "Après-midi",
+      "description": "Avant la récréation",
     },
 
     {
       "value": "AFTERNOON_BREAK",
-      "label": "Retour récréation après-midi",
+      "label": "Après-midi",
       "description": "Après la récréation",
     },
 

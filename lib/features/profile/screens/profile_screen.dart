@@ -48,6 +48,7 @@ class _ProfileScreenState
       setState(() {
         profile = data;
       });
+      
     } catch (_) {
     } finally {
       setState(() {

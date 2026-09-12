@@ -69,13 +69,13 @@ class AttendanceSummaryCard
 
             children: [
 
-              Expanded(
+              /*Expanded(
                 child: _Item(
                   "Présent",
                   summary.present,
                   Colors.green,
                 ),
-              ),
+              ),*/
 
               Expanded(
                 child: _Item(

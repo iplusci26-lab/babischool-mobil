@@ -63,64 +63,10 @@ class TeacherScheduleCourseModel {
     Map<String, dynamic> json,
   ) {
     debugPrint(
-    "========================================",
+    "================== SCHEDULE COURSE JSON ======================",
   );
 
-  debugPrint(
-    "SCHEDULE COURSE JSON:",
-  );
-
-  debugPrint(
-    json.toString(),
-  );
-
-  debugPrint(
-    "schedule_id = ${json["schedule_id"]}",
-  );
-
-  debugPrint(
-    "assignment_id = ${json["assignment_id"]}",
-  );
-
-  debugPrint(
-    "assignment_type = ${json["assignment_type"]}",
-  );
-
-  debugPrint(
-    "attendance_mode = ${json["attendance_mode"]}",
-  );
-
-  debugPrint(
-    "is_primary = ${json["is_primary"]}",
-  );
-
-  debugPrint(
-    "classroom = ${json["classroom"]}",
-  );
-
-  debugPrint(
-    "group = ${json["group"]}",
-  );
-
-  debugPrint(
-    "subject = ${json["subject"]}",
-  );
-
-  debugPrint(
-    "start_time = ${json["start_time"]}",
-  );
-
-  debugPrint(
-    "end_time = ${json["end_time"]}",
-  );
-
-  debugPrint(
-    "room = ${json["room"]}",
-  );
-
-  debugPrint(
-    "========================================",
-  );
+ 
     return TeacherScheduleCourseModel(
       scheduleId:
           json["schedule_id"]?.toString() ?? "",

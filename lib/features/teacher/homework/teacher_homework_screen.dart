@@ -242,7 +242,7 @@ class _TeacherHomeworkScreenState
       return Scaffold(
         appBar: AppBar(
           title:
-              const Text("Devoirs"),
+              const Text("Exercices"),
         ),
 
         body: ErrorView(
@@ -265,7 +265,7 @@ class _TeacherHomeworkScreenState
         elevation: 0,
 
         title:
-            const Text("Devoirs"),
+            const Text("Exercices"),
 
         actions: [
           IconButton(
@@ -418,7 +418,7 @@ class _TeacherHomeworkScreenState
                     icon:
                         Icons.assignment,
                     title:
-                        "Devoirs",
+                        "Exercice(s)",
                     value:
                         data.homeworks
                             .length
@@ -470,7 +470,7 @@ class _TeacherHomeworkScreenState
 
               children: [
                 const Text(
-                  "Mes devoirs",
+                  "Mes Exercices",
 
                   style:
                       TextStyle(

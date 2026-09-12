@@ -90,80 +90,50 @@ class AssessmentModel {
       status == AssessmentStatus.cancelled;
 
   factory AssessmentModel.fromJson(
+  Map<String, dynamic> json,
+) {
+  return AssessmentModel(
+    id: json["id"].toString(),
 
-    Map<String, dynamic> json,
+    title: json["title"] ?? "",
 
-  ) {
+    subject: json["subject"] ?? "",
 
-    return AssessmentModel(
+    teacher: json["teacher"] ?? "",
 
-      id:
-      json["id"].toString(),
+    type: json["type"] ?? "",
 
-      title:
-      json["title"] ?? "",
+    typeIcon: json["type_icon"] ?? "",
 
-      subject:
-      json["subject"] ?? "",
+    date: json["date"] ?? "",
 
-      teacher:
-      json["teacher"] ?? "",
+    dateGroup: json["date_group"] ?? "later",
 
-      type:
-      json["type"] ?? "",
+    dateLabel: json["date_label"] ?? "",
 
-      typeIcon:
-      json["type_icon"] ?? "",
+    time: json["time"] ?? "",
 
-      date:
-      json["date"] ?? "",
+    maxScore:
+      (json["max_score"] as num?)?.toDouble() ?? 20.0,
 
-      dateGroup:
-      json["date_group"] ?? "later",
+    weight:
+        (json["weight"] as num?)?.toInt() ?? 1,
 
-      dateLabel:
-      json["date_label"] ?? "",
+    status:
+        AssessmentStatusExtension.fromString(
+      json["status"] ?? "upcoming",
+    ),
 
-      time:
-      json["time"] ?? "",
+    statusLabel:
+        json["status_label"] ?? "",
 
-      maxScore:
-      double.tryParse(
-        json["max_score"].toString(),
-      ) ??
-      20,
+    color:
+        json["color"] ?? "blue",
 
-      weight:
-      json["weight"] ?? 1,
-
-      status:
-
-      AssessmentStatusExtension.fromString(
-
-        json["status"] ?? "upcoming",
-
-      ),
-
-      statusLabel:
-
-      json["status_label"] ?? "",
-
-      color:
-
-      json["color"] ?? "blue",
-
-      score:
-
-      json["score"] == null
-
-      ? null
-
-      : double.tryParse(
-
-          json["score"].toString(),
-
-        ),
-
-    );
-  }
+    score:
+        json["score"] == null
+            ? null
+            : (json["score"] as num).toDouble(),
+  );
+}
 }

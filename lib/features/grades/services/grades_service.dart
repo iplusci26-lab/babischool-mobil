@@ -1,18 +1,18 @@
 import '../../../core/api/api_client.dart';
-
 import '../models/grades_model.dart';
 
 class GradesService {
-
   Future<GradesModel> getGrades(
-    String studentId,
-  ) async {
-    print("studentId $studentId");
-    final response =
-        await ApiClient.dio.get(
+    String studentId, {
+    String? termId,
+  }) async {
+    final response = await ApiClient.dio.get(
       "/mobile/students/$studentId/grades/",
+      queryParameters: {
+        if (termId != null) "term_id": termId,
+      },
     );
-    print("reponses ${response.data}");
+
     return GradesModel.fromJson(
       response.data,
     );

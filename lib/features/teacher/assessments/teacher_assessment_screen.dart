@@ -769,7 +769,7 @@ class _TeacherAssessmentScreenState
                         onStatusChanged,
                   ),
                   _StatusFilter(
-                    label: "Prêtes",
+                    label: "Prêt",
                     value: "ready",
                     selected:
                         selectedStatus == "ready",
@@ -777,7 +777,7 @@ class _TeacherAssessmentScreenState
                         onStatusChanged,
                   ),
                   _StatusFilter(
-                    label: "Publiées",
+                    label: "Publié",
                     value: "published",
                     selected:
                         selectedStatus ==

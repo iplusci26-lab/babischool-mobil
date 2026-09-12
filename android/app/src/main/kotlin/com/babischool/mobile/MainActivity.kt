@@ -1,4 +1,4 @@
-package com.example.babischool_mobile
+package com.babischool.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

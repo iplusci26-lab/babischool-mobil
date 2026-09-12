@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../../../core/api/api_client.dart';
 
 import '../models/attendance_model.dart';
@@ -9,15 +11,42 @@ class AttendanceService {
     String studentId,
   ) async {
 
-    final response =
+    try {
 
-    await ApiClient.dio.get(
+      final response =
 
-      "/mobile/students/$studentId/attendance/",
-    );
-    print("-------------- ${response.data}");
-    return AttendanceModel.fromJson(
-      response.data,
-    );
+      await ApiClient.dio.get(
+
+        "/mobile/students/$studentId/attendance/",
+
+      );
+
+
+      // ======================================================
+      // DEBUG
+      // ======================================================
+
+      return AttendanceModel.fromJson(
+
+        response.data,
+
+      );
+
+    } catch (e) {
+
+      print(
+        "ATTENDANCE API ERROR",
+      );
+
+      print(
+        e.toString(),
+      );
+
+     
+      rethrow;
+
+    }
+
   }
+
 }

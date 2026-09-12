@@ -1,80 +1,165 @@
+import java.util.Properties
+import java.io.FileInputStream
+
+// ============================================================
+// LECTURE DES PROPRIÉTÉS DU KEYSTORE
+// ============================================================
+
+val keystoreProperties = Properties()
+
+val keystorePropertiesFile =
+    rootProject.file("key.properties")
+
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(
+        FileInputStream(
+            keystorePropertiesFile
+        )
+    )
+}
+
+// ============================================================
+// PLUGINS
+// ============================================================
+
 plugins {
     id("com.android.application")
-    // START: FlutterFire Configuration
+
+    // Firebase
     id("com.google.gms.google-services")
-    // END: FlutterFire Configuration
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+
+    // Flutter
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// ============================================================
+// ANDROID
+// ============================================================
+
 android {
-    namespace = "com.example.babischool_mobile"
+
+    // ========================================================
+    // IDENTITÉ DE L'APPLICATION
+    // ========================================================
+
+    namespace = "com.babischool.mobile"
+
     compileSdk = 36
+
     ndkVersion = flutter.ndkVersion
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-        isCoreLibraryDesugaringEnabled = true
+    // ========================================================
+    // CONFIGURATION DE SIGNATURE
+    // ========================================================
 
+    signingConfigs {
+
+        create("release") {
+
+            keyAlias =
+                keystoreProperties["keyAlias"] as String
+
+            keyPassword =
+                keystoreProperties["keyPassword"] as String
+
+            storeFile =
+                keystoreProperties["storeFile"]?.let {
+                    file(it)
+                }
+
+            storePassword =
+                keystoreProperties["storePassword"] as String
+        }
     }
+
+    // ========================================================
+    // JAVA
+    // ========================================================
+
+    compileOptions {
+
+        sourceCompatibility =
+            JavaVersion.VERSION_17
+
+        targetCompatibility =
+            JavaVersion.VERSION_17
+
+        isCoreLibraryDesugaringEnabled = true
+    }
+
+    // ========================================================
+    // CONFIGURATION PAR DÉFAUT
+    // ========================================================
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.babischool_mobile"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+
+        // PACKAGE GOOGLE PLAY
+        applicationId =
+            "com.babischool.mobile"
+
+        // SDK
+        minSdk =
+            flutter.minSdkVersion
+
         targetSdk = 36
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+
+        // VERSION
+        versionCode =
+            flutter.versionCode
+
+        versionName =
+            flutter.versionName
     }
 
+    // ========================================================
+    // BUILD TYPES
+    // ========================================================
+
     buildTypes {
+
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+
+            signingConfig =
+                signingConfigs.getByName(
+                    "release"
+                )
+
+            isMinifyEnabled = false
+
+            isShrinkResources = false
         }
     }
 }
+
+// ============================================================
+// DÉPENDANCES
+// ============================================================
 
 dependencies {
 
     coreLibraryDesugaring(
         "com.android.tools:desugar_jdk_libs:2.1.4"
     )
-
 }
+
+// ============================================================
+// KOTLIN
+// ============================================================
 
 kotlin {
+
     compilerOptions {
-        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+
+        jvmTarget =
+            org.jetbrains.kotlin.gradle.dsl
+                .JvmTarget.JVM_17
     }
 }
+
+// ============================================================
+// FLUTTER
+// ============================================================
 
 flutter {
     source = "../.."
-}
-
-
-configurations.all {
-    resolutionStrategy {
-        eachDependency {
-            if (requested.group == "com.mr.flutter.plugin.filepicker") {
-                // Si le plugin file_picker refuse de compiler, on force sa résolution
-            }
-        }
-    }
-}
-
-// Méthode globale pour écraser les propriétés de compilation de TOUS les modules Android
-project.rootProject.subprojects {
-    afterEvaluate {
-        if (plugins.hasPlugin("com.android.library") || plugins.hasPlugin("com.android.application")) {
-            extensions.findByType(com.android.build.gradle.BaseExtension::class.java)?.apply {
-                compileSdkVersion(36)
-            }
-        }
-    }
 }

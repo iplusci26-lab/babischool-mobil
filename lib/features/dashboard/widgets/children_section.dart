@@ -24,6 +24,9 @@ class ChildrenSection extends StatelessWidget {
 
         Color indicatorColor;
 
+        Color averageColor;
+
+
         String indicatorLabel;
 
         IconData indicatorIcon;
@@ -31,6 +34,8 @@ class ChildrenSection extends StatelessWidget {
         if (absenceHours == 0) {
 
           indicatorColor = Colors.green;
+
+          averageColor = Colors.green;
 
           indicatorLabel = "Excellent";
 
@@ -41,6 +46,8 @@ class ChildrenSection extends StatelessWidget {
 
           indicatorColor = Colors.orange;
 
+          averageColor = Colors.orange;
+
           indicatorLabel = "À surveiller";
 
           indicatorIcon = Icons.visibility_rounded;
@@ -49,6 +56,8 @@ class ChildrenSection extends StatelessWidget {
         else if (absenceHours <= 10) {
 
           indicatorColor = Colors.deepOrange;
+
+          averageColor = Colors.deepOrange;
 
           indicatorLabel = "Attention";
 
@@ -59,6 +68,8 @@ class ChildrenSection extends StatelessWidget {
 
           indicatorColor = Colors.red;
 
+          averageColor = Colors.red;
+
           indicatorLabel = "Critique";
 
           indicatorIcon = Icons.error_outline_rounded;
@@ -68,15 +79,14 @@ class ChildrenSection extends StatelessWidget {
          //--------------------------------------------------
         // Couleur de la moyenne
         //--------------------------------------------------
-        Color averageColor;
-
-        if (average < 10) {
+        
+        /*if (average < 10) {
           averageColor = Colors.red;
         } else if (average <= 12) {
           averageColor = Colors.orange;
         } else {
           averageColor = Colors.green;
-        }
+        }*/
 
         return Padding(
           padding: const EdgeInsets.only(bottom: 14),

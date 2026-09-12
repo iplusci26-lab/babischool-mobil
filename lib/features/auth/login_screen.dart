@@ -164,7 +164,7 @@ class _LoginScreenState
 
         SnackBar(
 
-          content: Text("Connexion echoué !"),
+          content: Text("Numéro ou mot de passe incorrecte !"),
 
         ),
 

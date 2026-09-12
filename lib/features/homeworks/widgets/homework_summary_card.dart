@@ -147,7 +147,7 @@ class HomeworkSummaryCard extends StatelessWidget {
 
                   value: submitted.toString(),
 
-                  label: "Remis",
+                  label: "Rendu",
 
                   color: Colors.green,
 

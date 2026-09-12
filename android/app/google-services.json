@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:318959128833:android:8da02fe0f8e2855b1ecb00",
+        "android_client_info": {
+          "package_name": "com.babischool.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_UdAat8fp1vrfvjatmc6tTNYlhlDBGwY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:318959128833:android:1a044b6901dd9a061ecb00",
         "android_client_info": {
           "package_name": "com.example.babischool_mobile"

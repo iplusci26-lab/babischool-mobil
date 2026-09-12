@@ -126,7 +126,7 @@ class ProfileHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(30),
             ),
             child: Text(
-              profile.role ?? profile.userType,
+              profile.userType == "teacher" ? "Enseignant" : profile.userType,
               style: const TextStyle(
                 color: Color(0xff6214BE),
                 fontWeight: FontWeight.w600,

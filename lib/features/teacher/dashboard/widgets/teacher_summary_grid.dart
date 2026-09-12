@@ -154,7 +154,7 @@ class TeacherSummaryGrid extends StatelessWidget {
         _SummaryCard(
 
           title:
-              "Devoirs",
+              "Exercices",
 
           value:
               summary.pendingHomeworks.toString(),

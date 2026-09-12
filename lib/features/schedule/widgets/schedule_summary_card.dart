@@ -24,7 +24,7 @@ class ScheduleSummaryCard extends StatelessWidget {
 
     switch (today) {
 
-      case "MONDY":
+      case "MONDAY":
         return "Lundi";
 
       case "TUESDAY":

@@ -411,7 +411,7 @@ class _TeacherDashboardScreenState
 
               _CourseActionTile(
                 icon: Icons.assignment_outlined,
-                title: "Devoirs",
+                title: "Exercices",
                 subtitle:
                     "Créer et gérer les devoirs",
                 onTap: () {

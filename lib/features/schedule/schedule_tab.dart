@@ -121,20 +121,23 @@ class _ScheduleTabState
 
   switch (day) {
 
-    case "Lundi":
-      return "Lun";
+    case "MONDAY":
+      return "Lundi";
 
-    case "Mardi":
-      return "Mar";
+    case "TUESDAY":
+      return "Mardi";
 
-    case "Mercredi":
-      return "Mer";
+    case "WEDNESDAY":
+      return "Mercrédi";
 
-    case "Jeudi":
-      return "Jeu";
+    case "THURSDAY":
+      return "Jeudi";
 
-    case "Vendredi":
-      return "Ven";
+    case "FRIDAY":
+      return "Vendredi";
+
+    case "SATURDAY":
+      return "Samedi";
 
     default:
       return day;

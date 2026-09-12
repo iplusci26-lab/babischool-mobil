@@ -8,61 +8,118 @@ import 'widgets/attendance_summary_card.dart';
 
 import 'widgets/attendance_history_tile.dart';
 
+
+// ==========================================================
+// ATTENDANCE TAB
+// ==========================================================
+
 class AttendanceTab
     extends StatefulWidget {
 
   final String studentId;
+
 
   const AttendanceTab({
 
     super.key,
 
     required this.studentId,
+
   });
+
 
   @override
   State<AttendanceTab>
-  createState() =>
-      _AttendanceTabState();
+      createState() =>
+          _AttendanceTabState();
+
 }
+
+
+// ==========================================================
+// STATE
+// ==========================================================
 
 class _AttendanceTabState
     extends State<AttendanceTab> {
 
+
+  // ========================================================
+  // SERVICE
+  // ========================================================
+
   final AttendanceService service =
       AttendanceService();
 
+
+  // ========================================================
+  // DATA
+  // ========================================================
+
   AttendanceModel? attendance;
+
+
+  // ========================================================
+  // LOADING
+  // ========================================================
 
   bool loading = true;
 
-  Future<void> loadData()
-  async {
+
+  // ========================================================
+  // LOAD DATA
+  // ========================================================
+
+  Future<void> loadData() async {
 
     try {
 
-      attendance =
+      if (mounted) {
 
-      await service.getAttendance(
+        setState(() {
+
+          loading = true;
+
+        });
+
+      }
+
+
+      attendance =
+          await service.getAttendance(
 
         widget.studentId,
+
       );
 
     } catch (e) {
 
       debugPrint(
-        e.toString(),
+
+        "Erreur chargement présences : $e",
+
       );
+
+    } finally {
+
+      if (mounted) {
+
+        setState(() {
+
+          loading = false;
+
+        });
+
+      }
+
     }
 
-    if (mounted) {
-
-      setState(() {
-
-        loading = false;
-      });
-    }
   }
+
+
+  // ========================================================
+  // INIT
+  // ========================================================
 
   @override
   void initState() {
@@ -70,21 +127,39 @@ class _AttendanceTabState
     super.initState();
 
     loadData();
+
   }
+
+
+  // ========================================================
+  // BUILD
+  // ========================================================
 
   @override
   Widget build(
     BuildContext context,
   ) {
 
+
+    // ======================================================
+    // LOADING
+    // ======================================================
+
     if (loading) {
 
       return const Center(
 
         child:
-        CircularProgressIndicator(),
+            CircularProgressIndicator(),
+
       );
+
     }
+
+
+    // ======================================================
+    // ERROR / EMPTY
+    // ======================================================
 
     if (attendance == null) {
 
@@ -93,9 +168,17 @@ class _AttendanceTabState
         child: Text(
 
           "Impossible de charger les présences",
+
         ),
+
       );
+
     }
+
+
+    // ======================================================
+    // CONTENT
+    // ======================================================
 
     return RefreshIndicator(
 
@@ -103,22 +186,37 @@ class _AttendanceTabState
 
       child: ListView(
 
+        physics:
+            const AlwaysScrollableScrollPhysics(),
+
         padding:
-        const EdgeInsets.all(
-          20,
-        ),
+            const EdgeInsets.all(
+              20,
+            ),
 
         children: [
+
+
+          // ==================================================
+          // SUMMARY
+          // ==================================================
 
           AttendanceSummaryCard(
 
             summary:
-            attendance!.summary,
+                attendance!.summary,
+
           ),
+
 
           const SizedBox(
             height: 28,
           ),
+
+
+          // ==================================================
+          // TITLE
+          // ==================================================
 
           const Text(
 
@@ -129,33 +227,51 @@ class _AttendanceTabState
               fontSize: 18,
 
               fontWeight:
-              FontWeight.bold,
+                  FontWeight.bold,
+
             ),
+
           ),
+
 
           const SizedBox(
             height: 16,
           ),
 
-          if (attendance!
-              .history
-              .isEmpty)
+
+          // ==================================================
+          // EMPTY HISTORY
+          // ==================================================
+
+          if (
+              attendance!
+                  .history
+                  .isEmpty
+          )
 
             Container(
 
               padding:
-              const EdgeInsets.all(
-                40,
-              ),
+                  const EdgeInsets.all(
+                    40,
+                  ),
 
               child: const Center(
 
                 child: Text(
 
                   "Aucune présence enregistrée.",
+
                 ),
+
               ),
+
             )
+
+
+          // ==================================================
+          // HISTORY
+          // ==================================================
 
           else
 
@@ -163,15 +279,24 @@ class _AttendanceTabState
                 .history
                 .map(
 
-              (item) =>
+              (
+                item,
+              ) =>
 
                   AttendanceHistoryTile(
 
                 history: item,
+
               ),
+
             ),
+
         ],
+
       ),
+
     );
+
   }
+
 }

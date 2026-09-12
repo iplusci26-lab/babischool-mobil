@@ -21,8 +21,7 @@ class ScheduleDayView extends StatelessWidget {
   Widget build(BuildContext context) {
 
     if (day.courses.isEmpty) {
-      print("-------------- $day");
-      print("-------------- ${day.courses}");
+      
       return const EmptyView(
 
         title: "Aucun cours",

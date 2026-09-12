@@ -7,17 +7,17 @@ import '../../features/notifications/notification_service.dart';
 import '../../features/notifications/notification_websocket_service.dart';
 
 class AppHeader extends StatefulWidget {
-  //============================================================
+  // ============================================================
   // CONTENU
-  //============================================================
+  // ============================================================
 
   final String title;
 
   final String? subtitle;
 
-  //============================================================
+  // ============================================================
   // NOTIFICATIONS
-  //============================================================
+  // ============================================================
 
   final bool showNotification;
 
@@ -32,9 +32,9 @@ class AppHeader extends StatefulWidget {
   /// NotificationScreen.
   final VoidCallback? onNotificationTap;
 
-  //============================================================
+  // ============================================================
   // ACTIONS
-  //============================================================
+  // ============================================================
 
   final Widget? trailing;
 
@@ -42,9 +42,9 @@ class AppHeader extends StatefulWidget {
 
   final VoidCallback? onBack;
 
-  //============================================================
+  // ============================================================
   // CONSTRUCTEUR
-  //============================================================
+  // ============================================================
 
   const AppHeader({
     super.key,
@@ -59,43 +59,54 @@ class AppHeader extends StatefulWidget {
   });
 
   @override
-  State<AppHeader> createState() => _AppHeaderState();
+  State<AppHeader> createState() =>
+      _AppHeaderState();
 }
 
-//================================================================
+// =================================================================
 // STATE
-//================================================================
+// =================================================================
 
 class _AppHeaderState extends State<AppHeader> {
-  //============================================================
+  // ============================================================
   // SERVICES
-  //============================================================
+  // ============================================================
 
   final NotificationService notificationService =
       NotificationService();
 
-  final NotificationWebSocketService notificationSocket =
+  final NotificationWebSocketService
+      notificationSocket =
       NotificationWebSocketService();
 
-  //============================================================
+  // ============================================================
   // ÉTAT
-  //============================================================
+  // ============================================================
 
   int unreadCount = 0;
 
   bool loadingNotifications = false;
 
-  //============================================================
+  /// Compteur local obtenu après le retour de
+  /// NotificationScreen.
+  ///
+  /// Il devient prioritaire sur la valeur fournie
+  /// par le parent.
+  int? localNotificationCount;
+
+  // ============================================================
   // COMPTEUR À AFFICHER
-  //============================================================
+  // ============================================================
 
   int get displayedNotificationCount {
-    return widget.notificationCount ?? unreadCount;
+    return localNotificationCount ??
+        widget.notificationCount ??
+        unreadCount;
   }
 
-  //============================================================
+  // ============================================================
   // INIT
-  //============================================================
+  // ============================================================
 
   @override
   void initState() {
@@ -104,9 +115,9 @@ class _AppHeaderState extends State<AppHeader> {
     _initializeNotifications();
   }
 
-  //============================================================
+  // ============================================================
   // INITIALISATION NOTIFICATIONS
-  //============================================================
+  // ============================================================
 
   Future<void> _initializeNotifications() async {
     await _loadUnreadCount();
@@ -126,8 +137,20 @@ class _AppHeaderState extends State<AppHeader> {
             "NEW NOTIFICATION => $data",
           );
 
-          // Si le parent fournit lui-même le compteur,
-          // on ne le modifie pas ici.
+          // ----------------------------------------------------
+          // Une nouvelle notification invalide le compteur
+          // local précédent.
+          // ----------------------------------------------------
+
+          setState(() {
+            localNotificationCount = null;
+          });
+
+          // ----------------------------------------------------
+          // Si le parent fournit le compteur, on ne le modifie
+          // pas directement.
+          // ----------------------------------------------------
+
           if (widget.notificationCount != null) {
             return;
           }
@@ -138,17 +161,15 @@ class _AppHeaderState extends State<AppHeader> {
         },
       );
     } catch (e) {
-      // Le WebSocket ne doit jamais empêcher
-      // le fonctionnement de la cloche.
       debugPrint(
         "Erreur WebSocket notifications : $e",
       );
     }
   }
 
-  //============================================================
+  // ============================================================
   // CHARGER COMPTEUR
-  //============================================================
+  // ============================================================
 
   Future<void> _loadUnreadCount() async {
     if (loadingNotifications) {
@@ -159,15 +180,23 @@ class _AppHeaderState extends State<AppHeader> {
 
     try {
       final count =
-          await notificationService.getUnreadCount();
+          await notificationService
+              .getUnreadCount();
 
       if (!mounted) {
         return;
       }
 
-      // Si le parent fournit déjà son propre compteur,
-      // AppHeader ne l'écrase pas.
-      if (widget.notificationCount == null) {
+      setState(() {
+        unreadCount = count;
+      });
+
+      // --------------------------------------------------------
+      // Si aucune valeur locale n'est imposée,
+      // le compteur API devient la source actuelle.
+      // --------------------------------------------------------
+
+      if (localNotificationCount == null) {
         setState(() {
           unreadCount = count;
         });
@@ -181,18 +210,18 @@ class _AppHeaderState extends State<AppHeader> {
     }
   }
 
-  //============================================================
+  // ============================================================
   // CLIC SUR NOTIFICATION
-  //============================================================
+  // ============================================================
 
   Future<void> _handleNotificationTap() async {
     debugPrint(
       "🔔 AppHeader : clic sur la cloche",
     );
 
-    //==========================================================
-    // CAS 1 : ACTION FOURNIE PAR L'ÉCRAN
-    //==========================================================
+    // ==========================================================
+    // CAS 1 : ACTION PERSONNALISÉE
+    // ==========================================================
 
     if (widget.onNotificationTap != null) {
       debugPrint(
@@ -204,9 +233,9 @@ class _AppHeaderState extends State<AppHeader> {
       return;
     }
 
-    //==========================================================
+    // ==========================================================
     // CAS 2 : NAVIGATION AUTOMATIQUE
-    //==========================================================
+    // ==========================================================
 
     debugPrint(
       "🔔 AppHeader : ouverture de NotificationScreen",
@@ -216,26 +245,45 @@ class _AppHeaderState extends State<AppHeader> {
       return;
     }
 
-    await Navigator.of(context).push(
+    final result =
+        await Navigator.of(context).push<int>(
       MaterialPageRoute(
-        builder: (_) => const NotificationScreen(),
+        builder: (_) =>
+            const NotificationScreen(),
       ),
     );
-
-    //==========================================================
-    // ACTUALISER LE COMPTEUR AU RETOUR
-    //==========================================================
 
     if (!mounted) {
       return;
     }
 
+    // ==========================================================
+    // COMPTEUR RETOURNÉ PAR NOTIFICATION SCREEN
+    // ==========================================================
+
+    if (result != null) {
+      debugPrint(
+        "🔔 Notifications non lues après retour : $result",
+      );
+
+      setState(() {
+        localNotificationCount = result;
+        unreadCount = result;
+      });
+
+      return;
+    }
+
+    // ==========================================================
+    // FALLBACK
+    // ==========================================================
+
     await _loadUnreadCount();
   }
 
-  //============================================================
+  // ============================================================
   // DISPOSE
-  //============================================================
+  // ============================================================
 
   @override
   void dispose() {
@@ -244,18 +292,22 @@ class _AppHeaderState extends State<AppHeader> {
     super.dispose();
   }
 
-  //============================================================
+  // ============================================================
   // BUILD
-  //============================================================
+  // ============================================================
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context,
+  ) {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
+          bottomLeft:
+              Radius.circular(28),
+          bottomRight:
+              Radius.circular(28),
         ),
         boxShadow: [
           BoxShadow(
@@ -276,7 +328,8 @@ class _AppHeaderState extends State<AppHeader> {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(
+          padding:
+              const EdgeInsets.fromLTRB(
             20,
             18,
             20,
@@ -286,15 +339,15 @@ class _AppHeaderState extends State<AppHeader> {
             crossAxisAlignment:
                 CrossAxisAlignment.start,
             children: [
-              //==================================================
+              // ==================================================
               // LOGO + ACTION
-              //==================================================
+              // ==================================================
 
               Row(
                 children: [
-                  //================================================
+                  // ==============================================
                   // BOUTON RETOUR
-                  //================================================
+                  // ==============================================
 
                   if (widget.onBack != null) ...[
                     InkWell(
@@ -302,7 +355,8 @@ class _AppHeaderState extends State<AppHeader> {
                           BorderRadius.circular(
                         16,
                       ),
-                      onTap: widget.onBack,
+                      onTap:
+                          widget.onBack,
                       child: Container(
                         width: 52,
                         height: 52,
@@ -313,15 +367,19 @@ class _AppHeaderState extends State<AppHeader> {
                             0xffF7F8FC,
                           ),
                           borderRadius:
-                              BorderRadius.circular(
+                              BorderRadius
+                                  .circular(
                             16,
                           ),
                         ),
-                        child: const Icon(
+                        child:
+                            const Icon(
                           Icons
                               .arrow_back_rounded,
                           color:
-                              Color(0xff23314D),
+                              Color(
+                            0xff23314D,
+                          ),
                           size: 26,
                         ),
                       ),
@@ -331,9 +389,9 @@ class _AppHeaderState extends State<AppHeader> {
                     ),
                   ],
 
-                  //================================================
+                  // ==============================================
                   // LOGO
-                  //================================================
+                  // ==============================================
 
                   Expanded(
                     child: InkWell(
@@ -345,14 +403,14 @@ class _AppHeaderState extends State<AppHeader> {
                           widget.onLogoTap,
                       child: Row(
                         children: [
-                          // Logo légèrement arrondi
                           Container(
                             width: 70,
                             height: 70,
                             decoration:
                                 BoxDecoration(
                               borderRadius:
-                                  BorderRadius.circular(
+                                  BorderRadius
+                                      .circular(
                                 26,
                               ),
                             ),
@@ -360,7 +418,8 @@ class _AppHeaderState extends State<AppHeader> {
                                 Clip.antiAlias,
                             child:
                                 const AppLogo(
-                              showText: false,
+                              showText:
+                                  false,
                               size: 70,
                             ),
                           ),
@@ -370,20 +429,24 @@ class _AppHeaderState extends State<AppHeader> {
                           ),
 
                           Flexible(
-                            child: Column(
+                            child:
+                                Column(
                               crossAxisAlignment:
                                   CrossAxisAlignment
                                       .start,
-                              children: const [
+                              children:
+                                  const [
                                 Text(
                                   "BabiSchool",
-                                  maxLines: 1,
+                                  maxLines:
+                                      1,
                                   overflow:
                                       TextOverflow
                                           .ellipsis,
                                   style:
                                       TextStyle(
-                                    fontSize: 20,
+                                    fontSize:
+                                        20,
                                     fontWeight:
                                         FontWeight
                                             .bold,
@@ -398,15 +461,18 @@ class _AppHeaderState extends State<AppHeader> {
                                 ),
                                 Text(
                                   "Le suivi scolaire de votre enfant à distance",
-                                  maxLines: 1,
+                                  maxLines:
+                                      1,
                                   overflow:
                                       TextOverflow
                                           .ellipsis,
                                   style:
                                       TextStyle(
-                                    fontSize: 11,
+                                    fontSize:
+                                        11,
                                     color:
-                                        Colors.grey,
+                                        Colors
+                                            .grey,
                                   ),
                                 ),
                               ],
@@ -417,13 +483,15 @@ class _AppHeaderState extends State<AppHeader> {
                     ),
                   ),
 
-                  //================================================
+                  // ==============================================
                   // ACTION
-                  //================================================
+                  // ==============================================
 
-                  if (widget.trailing != null)
+                  if (widget.trailing !=
+                      null)
                     widget.trailing!
-                  else if (widget.showNotification)
+                  else if (widget
+                      .showNotification)
                     _buildNotificationButton(),
                 ],
               ),
@@ -432,13 +500,14 @@ class _AppHeaderState extends State<AppHeader> {
                 height: 28,
               ),
 
-              //==================================================
+              // ==================================================
               // TITRE
-              //==================================================
+              // ==================================================
 
               Text(
                 widget.title,
-                style: const TextStyle(
+                style:
+                    const TextStyle(
                   fontSize: 22,
                   fontWeight:
                       FontWeight.bold,
@@ -447,11 +516,12 @@ class _AppHeaderState extends State<AppHeader> {
                 ),
               ),
 
-              //==================================================
+              // ==================================================
               // SOUS-TITRE
-              //==================================================
+              // ==================================================
 
-              if (widget.subtitle != null) ...[
+              if (widget.subtitle !=
+                  null) ...[
                 const SizedBox(
                   height: 8,
                 ),
@@ -471,9 +541,9 @@ class _AppHeaderState extends State<AppHeader> {
     );
   }
 
-  //============================================================
+  // ============================================================
   // BOUTON NOTIFICATION
-  //============================================================
+  // ============================================================
 
   Widget _buildNotificationButton() {
     return Material(
@@ -490,9 +560,9 @@ class _AppHeaderState extends State<AppHeader> {
             clipBehavior:
                 Clip.none,
             children: [
-              //==================================================
+              // ==================================================
               // BOUTON
-              //==================================================
+              // ==================================================
 
               Container(
                 width: 52,
@@ -521,7 +591,8 @@ class _AppHeaderState extends State<AppHeader> {
                     ),
                   ],
                 ),
-                child: const Icon(
+                child:
+                    const Icon(
                   Icons
                       .notifications_none_rounded,
                   color:
@@ -530,11 +601,12 @@ class _AppHeaderState extends State<AppHeader> {
                 ),
               ),
 
-              //==================================================
+              // ==================================================
               // BADGE
-              //==================================================
+              // ==================================================
 
-              if (displayedNotificationCount > 0)
+              if (displayedNotificationCount >
+                  0)
                 Positioned(
                   right: -3,
                   top: -3,
@@ -569,7 +641,8 @@ class _AppHeaderState extends State<AppHeader> {
                               Colors.white,
                           fontSize: 10,
                           fontWeight:
-                              FontWeight.bold,
+                              FontWeight
+                                  .bold,
                         ),
                       ),
                     ),
