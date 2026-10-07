@@ -10,7 +10,7 @@ import 'change_password_screen.dart';
 import '../../auth/services/auth_service.dart';
 import '../../../shared/widgets/app_header.dart';
 import '../../../core/theme/app_colors.dart';
-
+import 'help_support_screen.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
     super.key,
@@ -160,7 +160,14 @@ class _ProfileScreenState
                     _buildTile(
                       icon: Icons.help_outline,
                       title: "Aide & Support",
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const HelpSupportScreen(),
+                          ),
+                        );
+                      },
                     ),
 
                     const SizedBox(height: 24),
