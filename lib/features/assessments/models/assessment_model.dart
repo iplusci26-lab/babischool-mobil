@@ -23,7 +23,7 @@ class AssessmentModel {
 
   final double maxScore;
 
-  final int weight;
+  final double weight;
 
   final AssessmentStatus status;
 
@@ -117,7 +117,7 @@ class AssessmentModel {
       (json["max_score"] as num?)?.toDouble() ?? 20.0,
 
     weight:
-        (json["weight"] as num?)?.toInt() ?? 1,
+        (json["weight"] as num?)?.toDouble() ?? 1,
 
     status:
         AssessmentStatusExtension.fromString(

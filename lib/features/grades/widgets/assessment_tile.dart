@@ -144,7 +144,7 @@ class AssessmentTile extends StatelessWidget {
             // ------------------------------------------------
 
             Text(
-              "$typeLabel • Coef ${assessment.weight}",
+              "$typeLabel • Coef ${assessment.formattedWeight}",
               style: TextStyle(
                 fontSize: 12,
                 color: typeColor,

@@ -11,6 +11,10 @@ import '../../auth/services/auth_service.dart';
 import '../../../shared/widgets/app_header.dart';
 import '../../../core/theme/app_colors.dart';
 import 'help_support_screen.dart';
+import '../../../core/storage/secure_storage_service.dart';
+import '../../auth/models/school_access_model.dart';
+import '../../auth/select_context_screen.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
     super.key,
@@ -23,21 +27,60 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState
     extends State<ProfileScreen> {
-  final ProfileService service =
-      ProfileService();
-  
-  final ImagePicker picker =
-    ImagePicker();
+    final ProfileService service =
+        ProfileService();
+    
+    final ImagePicker picker =
+      ImagePicker();
 
-  ProfileModel? profile;
+    ProfileModel? profile;
 
-  bool loading = true;
+    bool loading = true;
+    List<SchoolAccessModel> availableAccesses = [];
+
+    String? activeSchoolName;
+    String? activeRoleName;
 
   @override
   void initState() {
     super.initState();
 
     loadProfile();
+    loadAvailableAccesses();
+  }
+
+  Future<void> loadAvailableAccesses() async {
+    final storedAccesses =
+        await SecureStorageService.getAvailableAccesses();
+
+    final schoolName =
+        await SecureStorageService.getActiveSchoolName();
+
+    final roleName =
+        await SecureStorageService.getActiveRoleName();
+
+    if (!mounted) return;
+
+    setState(() {
+      availableAccesses = storedAccesses
+          .map((item) => SchoolAccessModel.fromJson(item))
+          .toList();
+
+      activeSchoolName = schoolName;
+      activeRoleName = roleName;
+    });
+  }
+
+  void openContextSelection() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SelectContextScreen(
+          accesses: availableAccesses,
+          isSwitching: true,
+        ),
+      ),
+    );
   }
 
   Future<void> loadProfile() async {
@@ -117,6 +160,33 @@ class _ProfileScreenState
                     ),
 
                     const SizedBox(height: 24),
+
+                    if (availableAccesses.length > 1) ...[
+                      _buildTile(
+                        icon: Icons.swap_horiz,
+                        title: "Changer d'établissement / rôle",
+                        onTap: openContextSelection,
+                      ),
+
+                      if (activeSchoolName != null && activeRoleName != null)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: 16,
+                            left: 8,
+                            right: 8,
+                          ),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "Espace actuel : $activeSchoolName • $activeRoleName",
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
 
                     _buildTile(
                       icon: Icons.person_outline,

@@ -1,9 +1,10 @@
+
 class AssessmentGradeModel {
   final String title;
   final String type;
   final double score;
   final double maxScore;
-  final int weight;
+  final double weight;
   final String date;
 
   AssessmentGradeModel({
@@ -19,19 +20,16 @@ class AssessmentGradeModel {
     Map<String, dynamic> json,
   ) {
     return AssessmentGradeModel(
-      title: json["title"] ?? "",
-      type: json["type"] ?? "",
-      score: (json["score"] as num).toDouble(),
-      maxScore: (json["max_score"] as num).toDouble(),
-      weight: (json["weight"] as num).toInt(),
+      title: json["title"]?.toString() ?? "",
+      type: json["type"]?.toString() ?? "",
+      score: (json["score"] as num?)?.toDouble() ?? 0.0,
+      maxScore: (json["max_score"] as num?)?.toDouble() ?? 0.0,
+      weight: (json["weight"] as num?)?.toDouble() ?? 0.0,
       date: json["date"]?.toString() ?? "",
     );
   }
 
-  // ==========================================================
-  // DATE POUR LE TRI
-  // ==========================================================
-
+  // Date utilisée pour le tri.
   DateTime? get parsedDate {
     if (date.isEmpty) {
       return null;
@@ -42,5 +40,14 @@ class AssessmentGradeModel {
     } catch (_) {
       return null;
     }
+  }
+
+  // Affiche 1 au lieu de 1.0, mais conserve 0.5 et 1.5.
+  String get formattedWeight {
+    if (weight == weight.truncateToDouble()) {
+      return weight.toInt().toString();
+    }
+
+    return weight.toString();
   }
 }

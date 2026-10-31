@@ -1,9 +1,10 @@
+
 import 'assessment_grade_model.dart';
 
 class SubjectGradeModel {
   final String subject;
   final String teacher;
-  final int coefficient;
+  final double coefficient;
   final double average;
   final List<AssessmentGradeModel> grades;
 
@@ -18,55 +19,47 @@ class SubjectGradeModel {
   factory SubjectGradeModel.fromJson(
     Map<String, dynamic> json,
   ) {
-    final grades = (json["grades"] as List? ?? [])
+    final grades = (json['grades'] as List? ?? [])
         .map(
-          (e) => AssessmentGradeModel.fromJson(e),
+          (e) => AssessmentGradeModel.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          ),
         )
         .toList();
 
-    // ========================================================
-    // TRI DES NOTES
-    //
-    // Plus récente → plus ancienne
-    // ========================================================
+    // Tri des notes : plus récente vers plus ancienne.
+    grades.sort((a, b) {
+      final dateA = a.parsedDate;
+      final dateB = b.parsedDate;
 
-    grades.sort(
-      (a, b) {
-        final dateA = a.parsedDate;
-        final dateB = b.parsedDate;
+      // Les notes sans date vont à la fin.
+      if (dateA == null && dateB == null) {
+        return 0;
+      }
 
-        // Les notes sans date vont à la fin.
-        if (dateA == null && dateB == null) {
-          return 0;
-        }
+      if (dateA == null) {
+        return 1;
+      }
 
-        if (dateA == null) {
-          return 1;
-        }
+      if (dateB == null) {
+        return -1;
+      }
 
-        if (dateB == null) {
-          return -1;
-        }
-
-        return dateB.compareTo(dateA);
-      },
-    );
+      return dateB.compareTo(dateA);
+    });
 
     return SubjectGradeModel(
-      subject: json["subject"] ?? "",
-      teacher: json["teacher"] ?? "",
+      subject: json['subject']?.toString() ?? '',
+      teacher: json['teacher']?.toString() ?? '',
       coefficient:
-          (json["coefficient"] as num?)?.toInt() ?? 0,
+          (json['coefficient'] as num?)?.toDouble() ?? 0.0,
       average:
-          (json["average"] as num?)?.toDouble() ?? 0.0,
+          (json['average'] as num?)?.toDouble() ?? 0.0,
       grades: grades,
     );
   }
 
-  // ==========================================================
-  // DATE DE LA NOTE LA PLUS RÉCENTE
-  // ==========================================================
-
+  // Date de la note la plus récente.
   DateTime? get latestGradeDate {
     if (grades.isEmpty) {
       return null;

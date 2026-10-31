@@ -99,6 +99,7 @@ android {
 
         // SDK
         minSdk =
+        
             flutter.minSdkVersion
 
         targetSdk = 36

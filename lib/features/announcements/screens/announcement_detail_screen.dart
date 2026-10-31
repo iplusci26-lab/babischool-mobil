@@ -54,21 +54,38 @@ class _AnnouncementDetailScreenState
   // DÉTERMINE SI LA PIÈCE JOINTE EST UNE IMAGE
   // ============================================================
 
-  bool get isImageAttachment {
-    final url = announcement?.attachmentUrl;
+ 
+bool get isImageAttachment {
+  final url = announcement?.attachmentUrl;
 
-    if (url == null || url.isEmpty) {
-      return false;
-    }
-
-    final cleanUrl = url.split("?").first.toLowerCase();
-
-    return cleanUrl.endsWith(".jpg") ||
-        cleanUrl.endsWith(".jpeg") ||
-        cleanUrl.endsWith(".png") ||
-        cleanUrl.endsWith(".webp") ||
-        cleanUrl.endsWith(".gif");
+  if (url == null || url.isEmpty) {
+    return false;
   }
+
+  final uri = Uri.tryParse(url);
+
+  if (uri == null) {
+    return false;
+  }
+
+  final path = uri.path.toLowerCase();
+
+  // Images Cloudinary : l'URL peut ne pas avoir d'extension.
+  if (uri.host.toLowerCase() == 'res.cloudinary.com' &&
+      path.contains('/image/upload/')) {
+    return true;
+  }
+
+  // Images dont l'URL possède une extension classique.
+  return path.endsWith('.jpg') ||
+      path.endsWith('.jpeg') ||
+      path.endsWith('.png') ||
+      path.endsWith('.webp') ||
+      path.endsWith('.gif') ||
+      path.endsWith('.bmp') ||
+      path.endsWith('.avif');
+}
+
 
   // ============================================================
   // NOM DU FICHIER

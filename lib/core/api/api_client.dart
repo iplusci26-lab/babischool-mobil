@@ -1,149 +1,93 @@
+
 import 'package:dio/dio.dart';
-
-import '../storage/secure_storage_service.dart';
-
-import 'endpoints.dart';
-
 import 'package:flutter/material.dart';
 
-import '../../features/auth/login_screen.dart';
+import '../storage/secure_storage_service.dart';
+import 'endpoints.dart';
+
 import '../../features/auth/services/auth_service.dart';
 import '../navigation/navigation_service.dart';
 
 class ApiClient {
-
   static final Dio dio = Dio(
-
     BaseOptions(
-
-      baseUrl:
-      Endpoints.baseUrl,
-
-      connectTimeout:
-      const Duration(seconds: 30),
-
-      receiveTimeout:
-      const Duration(seconds: 30),
+      baseUrl: Endpoints.baseUrl,
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
     ),
   );
-  // Empêche plusieurs redirections simultanées
+
   static bool _isRedirectingToLogin = false;
+
+  // Permet d'ignorer la redirection pendant certaines opérations.
+  static const String skipAuthRedirectKey = 'skipAuthRedirect';
+
   static Future<void> initialize() async {
+    dio.interceptors.clear();
 
-      dio.interceptors.clear();
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        // =========================================
+        // REQUEST
+        // =========================================
 
-      dio.interceptors.add(
+        onRequest: (options, handler) async {
+          final token =
+              await SecureStorageService.getAccessToken();
 
-        InterceptorsWrapper(
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
 
-          //------------------------------------------------------
-          // REQUEST
-          //------------------------------------------------------
+          handler.next(options);
+        },
 
-          onRequest: (
+        // =========================================
+        // ERROR
+        // =========================================
 
-            options,
-            handler,
+        onError: (DioException e, handler) async {
+          final statusCode = e.response?.statusCode;
 
-          ) async {
+          final skipRedirect =
+              e.requestOptions.extra[skipAuthRedirectKey] == true;
 
-            final token =
-                await SecureStorageService.getAccessToken();
+          if (statusCode != 401 || skipRedirect) {
+            return handler.next(e);
+          }
 
-            if (token != null) {
+          if (_isRedirectingToLogin) {
+            return handler.next(e);
+          }
 
-              options.headers["Authorization"] =
-                  "Bearer $token";
+          _isRedirectingToLogin = true;
 
-            }
+          try {
+            final context =
+                NavigationService.navigatorKey.currentContext;
 
-            handler.next(options);
+            if (context != null && context.mounted) {
+              await AuthService.logout(context);
 
-          },
-
-          //------------------------------------------------------
-          // ERROR
-          //------------------------------------------------------
-
-          onError: (
-
-          DioException e,
-          ErrorInterceptorHandler handler,
-
-        ) async {
-
-            if (e.response?.statusCode == 401) {
-
-              //--------------------------------------------------
-              // Une redirection est déjà en cours
-              //--------------------------------------------------
-
-              if (_isRedirectingToLogin) {
-
-                return handler.next(e);
-
-              }
-
-              _isRedirectingToLogin = true;
-
-
-              
-
-              //--------------------------------------------------
-              // Nettoyage de la session
-              //--------------------------------------------------
-
-                final context = NavigationService.navigatorKey.currentContext;
-
-                  if (context != null) {
-
-                      await AuthService.logout(
-                        context,
-                       );
-
-                  }
-                                  
-                // Petite pause pour laisser le temps à la navigation
-                await Future.delayed(
-                  const Duration(milliseconds: 500),
-                );
-
-                _isRedirectingToLogin = false;
-
-                //--------------------------------------------------
-                // Afficher un message
-                //--------------------------------------------------
-
-               
-
-                if (context != null) {
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-
-                    const SnackBar(
-
-                      content: Text(
-
-                        "Votre session a expiré. Veuillez vous reconnecter.",
-
-                      ),
-
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Votre session a expiré. Veuillez vous reconnecter.',
                     ),
-
-                  );
-
-                }
-                
-
+                  ),
+                );
               }
+            } else {
+              await SecureStorageService.clear();
+            }
+          } finally {
+            _isRedirectingToLogin = false;
+          }
 
-              handler.next(e);
-
-      },
-
-    ),
-
-  );
-
-}
+          handler.next(e);
+        },
+      ),
+    );
+  }
 }

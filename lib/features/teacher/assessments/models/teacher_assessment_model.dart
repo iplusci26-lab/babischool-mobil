@@ -13,7 +13,7 @@ class TeacherAssessmentModel {
 
   final double maxScore;
 
-  final int weight;
+  final double weight;
 
   final String status;
 
@@ -70,7 +70,7 @@ class TeacherAssessmentModel {
           _toDouble(json["max_score"]),
 
       weight:
-          _toInt(json["weight"]),
+          _toDouble(json["weight"]),
 
       status:
           json["status"]?.toString() ?? "",
@@ -178,7 +178,7 @@ class TeacherAssessmentModel {
     String? category,
     String? categoryLabel,
     double? maxScore,
-    int? weight,
+    double? weight,
     String? status,
     String? statusLabel,
     DateTime? dateAssessment,

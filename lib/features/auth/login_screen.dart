@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/storage/secure_storage_service.dart';
 import '../../core/notifications/notification_service.dart';
-
+import 'select_context_screen.dart';
 import 'services/auth_service.dart';
 import 'splash_screen.dart';
 import 'contact_screen.dart';
@@ -64,33 +64,74 @@ class _LoginScreenState extends State<LoginScreen> {
         password: passwordController.text,
       );
 
-      //--------------------------------------
-      // SAUVEGARDE DES TOKENS
-      //--------------------------------------
-
-      await SecureStorageService.saveAccessToken(
-        response.access,
+     await SecureStorageService.saveAvailableAccesses(
+        response.accesses.map((access) => access.toJson()).toList(),
       );
 
-      await SecureStorageService.saveRefreshToken(
-        response.refresh,
-      );
-
-      await SecureStorageService.saveUserType(
-        response.user.userType,
-      );
-
-      await SecureStorageService.saveUser(
-        response.user.toJson(),
-      );
+      for (final access in response.accesses) {
+        debugPrint(
+          "ECOLE: ${access.schoolName} | ROLE: ${access.roleCode}",
+        );
+      }
 
       //--------------------------------------
-      // ENREGISTRER LE TOKEN FCM
+      // SELECTION DU CONTEXTE SI NECESSAIRE
       //--------------------------------------
+
+      if (response.requiresContext || response.accesses.length > 1) {
+        if (response.accesses.isEmpty) {
+          throw Exception("Aucun accès disponible.");
+        }
+
+        if (!mounted) return;
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SelectContextScreen(
+              accesses: response.accesses,
+              phone: phoneController.text.trim(),
+              password: passwordController.text,
+            ),
+          ),
+        );
+
+        return;
+      }
+
+      //--------------------------------------
+      // CONNEXION DIRECTE
+      //--------------------------------------
+
+      if (response.access == null ||
+          response.refresh == null ||
+          response.user == null) {
+        throw Exception("Réponse de connexion incomplète.");
+      }
+
+     final activeContext = response.context ??
+          (response.accesses.length == 1
+              ? response.accesses.first.toJson()
+              : null);
+
+      if (activeContext == null) {
+        throw Exception(
+          "Le contexte actif est absent de la réponse serveur.",
+        );
+      }
+
+      await SecureStorageService.saveSession(
+        accessToken: response.access!,
+        refreshToken: response.refresh!,
+        user: response.user!.toJson(),
+        schoolId: (activeContext["school_id"] ?? "").toString(),
+        schoolName: (activeContext["school_name"] ?? "École").toString(),
+        roleId: (activeContext["role_id"] ?? "").toString(),
+        roleName: (activeContext["role_name"] ?? "Utilisateur").toString(),
+        roleCode: (activeContext["role_code"] ?? response.user!.userType).toString(),
+      );
 
       await NotificationService.instance.registerDevice();
-
-      //--------------------------------------
 
       if (!mounted) return;
 
@@ -101,6 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         (_) => false,
       );
+      
     } catch (e) {
       if (!mounted) return;
 

@@ -12,6 +12,9 @@ import 'package:babischool_mobile/shared/shells/parent/parent_shell.dart';
 
 import 'login_screen.dart';
 
+import 'package:flutter/foundation.dart';
+import 'package:in_app_update/in_app_update.dart';
+
 class SplashScreen extends StatefulWidget {
 
   const SplashScreen({
@@ -72,6 +75,80 @@ class _SplashScreenState
 
   }
 
+  
+Future<void> checkForAppUpdate() async {
+  // Google Play In-App Updates est réservé à Android.
+  if (defaultTargetPlatform != TargetPlatform.android) {
+    return;
+  }
+
+  try {
+    final updateInfo = await InAppUpdate.checkForUpdate();
+
+    if (!mounted ||
+        updateInfo.updateAvailability !=
+            UpdateAvailability.updateAvailable) {
+      return;
+    }
+
+    final shouldUpdate = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Text(
+            'Mise à jour disponible',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            'Une nouvelle version de BabiSchool est disponible. '
+            'Mettez à jour votre application pour profiter '
+            'des dernières améliorations.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+              child: const Text('Plus tard'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xff6214BE),
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
+              child: const Text('Mettre à jour'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldUpdate != true || !mounted) {
+      return;
+    }
+
+    final result = await InAppUpdate.performImmediateUpdate();
+
+    if (result == AppUpdateResult.userDeniedUpdate) {
+      debugPrint('L’utilisateur a annulé la mise à jour.');
+    } else if (result == AppUpdateResult.inAppUpdateFailed) {
+      debugPrint('La mise à jour a échoué.');
+    }
+  } catch (e, stackTrace) {
+    // Une erreur de vérification ne doit pas bloquer
+    // l'accès à BabiSchool.
+    debugPrint('Vérification de mise à jour impossible : $e');
+    debugPrintStack(stackTrace: stackTrace);
+  }
+}
+
   //--------------------------------------------------
 
   Future<void> initialize() async {
@@ -86,6 +163,10 @@ class _SplashScreenState
 
     if (!mounted) return;
 
+    await checkForAppUpdate();
+
+    if (!mounted) return;
+  //--------------------------------------------------
     setState(() {
 
       status =
@@ -165,87 +246,50 @@ class _SplashScreenState
 
     );
 
+
     switch (role) {
+  case "teacher":
+    setState(() {
+      status = "Chargement de votre espace Enseignant...";
+    });
 
-      case "teacher":
+    await Future.delayed(const Duration(milliseconds: 700));
 
-        setState(() {
+    navigate(const TeacherShell());
+    break;
 
-          status =
-              "Chargement de votre espace Enseignant...";
+  case "admin":
+  case "staff":
+    setState(() {
+      status = "Chargement de votre espace Administratif...";
+    });
 
-        });
+    await Future.delayed(const Duration(milliseconds: 700));
 
-        await Future.delayed(
+    navigate(const StaffShell());
+    break;
 
-          const Duration(
-            milliseconds: 700,
-          ),
+  case "prt":
+  case "parent":
+    setState(() {
+      status = "Chargement de votre espace Parent...";
+    });
 
-        );
+    await Future.delayed(const Duration(milliseconds: 700));
 
-        navigate(
+    navigate(
+      ParentShell(key: parentShellKey),
+    );
+    break;
 
-          const TeacherShell(),
+  default:
+    debugPrint("Rôle non reconnu : $role");
 
-        );
+    await SecureStorageService.clear();
 
-        break;
-
-      case "admin":
-
-      case "staff":
-
-        setState(() {
-
-          status =
-              "Chargement de votre espace Administratif...";
-
-        });
-
-        await Future.delayed(
-
-          const Duration(
-            milliseconds: 700,
-          ),
-
-        );
-
-        navigate(
-
-          const StaffShell(),
-
-        );
-
-        break;
-
-      default:
-
-        setState(() {
-
-          status =
-              "Chargement de votre espace Parent...";
-
-        });
-
-        await Future.delayed(
-
-          const Duration(
-            milliseconds: 700,
-          ),
-
-        );
-
-        navigate(
-
-          ParentShell(
-            key: parentShellKey,
-          ),
-
-        );
-
-    }
-
+    navigate(const LoginScreen());
+    break;
+}
   }
 
   //--------------------------------------------------

@@ -284,7 +284,7 @@ class _TeacherAssessmentFormState
       _weightController.text.trim(),
     );
 
-    if (weight == null || weight <= 0) {
+    if (weight == null || weight < 0) {
       _showError(
         "Le coefficient doit être supérieur à zéro.",
       );

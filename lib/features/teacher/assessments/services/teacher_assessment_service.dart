@@ -108,7 +108,7 @@ class TeacherAssessmentService {
       );
     }
 
-    if (weight <= 0) {
+    if (weight < 0) {
       throw Exception(
         "Le coefficient doit être supérieur à zéro.",
       );
@@ -260,7 +260,7 @@ class TeacherAssessmentService {
       );
     }
 
-    if (weight <= 0) {
+    if (weight < 0) {
       throw Exception(
         "Le coefficient doit être supérieur à zéro.",
       );

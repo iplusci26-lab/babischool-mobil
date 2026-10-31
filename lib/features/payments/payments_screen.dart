@@ -80,41 +80,27 @@ class _PaymentsScreenState
   // Changement d'enfant
   //-------------------------------------------------------
 
-  Future<void> changeChild(
+ 
+Future<void> changeChild(ChildFinanceModel child) async {
+  if (!mounted) return;
 
-    ChildFinanceModel child,
+  setState(() => loading = true);
 
-  ) async {
+  try {
+    await service.changeActiveChild(child.id);
 
-    setState(() {
+    if (!mounted) return;
 
-      loading = true;
+    await loadData();
+  } catch (e) {
+    debugPrint("Erreur changement enfant : $e");
 
-    });
+    if (!mounted) return;
 
-    try {
-
-      await service.changeActiveChild(
-
-        child.id,
-
-      );
-
-      await loadData();
-
-    } catch (_) {
-
-      if (!mounted) return;
-
-      setState(() {
-
-        loading = false;
-
-      });
-
-    }
-
+    setState(() => loading = false);
   }
+}
+
 
   //-------------------------------------------------------
   // Temps réel

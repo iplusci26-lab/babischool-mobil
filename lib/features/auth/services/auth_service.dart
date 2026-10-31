@@ -4,6 +4,8 @@ import '../login_screen.dart';
 import '../../../core/api/api_client.dart';
 import '../models/login_response_model.dart';
 import '../../../core/api/endpoints.dart';
+import '../models/school_access_model.dart';
+
 
 class AuthService {
 
@@ -31,6 +33,44 @@ class AuthService {
       response.data,
     );
   }
+
+  Future<LoginResponseModel> selectContext({
+  required String phone,
+  required String password,
+  required SchoolAccessModel access,
+}) async {
+  final response = await ApiClient.dio.post(
+    Endpoints.selectContext,
+    data: {
+      "phone": phone,
+      "password": password,
+      "school_id": access.schoolId,
+      "role_id": access.roleId,
+    },
+  );
+
+  return LoginResponseModel.fromJson(
+    Map<String, dynamic>.from(response.data),
+  );
+}
+
+
+Future<LoginResponseModel> switchContext({
+  required SchoolAccessModel access,
+}) async {
+  final response = await ApiClient.dio.post(
+    Endpoints.switchContext,
+    data: {
+      "school_id": access.schoolId,
+      "role_id": access.roleId,
+    },
+  );
+
+  return LoginResponseModel.fromJson(
+    Map<String, dynamic>.from(response.data),
+  );
+}
+
 
   //------------------------------------------------------
   // LOGOUT

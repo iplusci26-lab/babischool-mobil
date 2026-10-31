@@ -7,7 +7,8 @@ class Endpoints {
   
     
 
-
+  static const selectContext = "/mobile/select-context/";
+  static const switchContext = "/mobile/switch-context/";
   static const login =
       "/mobile/login/";
 

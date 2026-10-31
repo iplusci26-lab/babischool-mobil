@@ -1,6 +1,7 @@
 import '../models/finance_summary_model.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/storage/secure_storage_service.dart';
 
 class PaymentService {
 
@@ -18,21 +19,41 @@ class PaymentService {
     );
   }
 
-  Future<void> changeActiveChild(
-  String childId,
-) async {
 
-  await ApiClient.dio.post(
 
+Future<void> changeActiveChild(String childId) async {
+  final response = await ApiClient.dio.post(
     "/mobile/active-child/",
-
     data: {
-
-      "student_id":
-      childId,
+      "student_id": childId,
     },
   );
+
+  final data = response.data;
+
+  final accessToken = data["access"];
+  final refreshToken = data["refresh"];
+
+  if (accessToken == null || refreshToken == null) {
+    throw Exception("Les nouveaux tokens sont absents.");
+  }
+
+  await SecureStorageService.saveAccessToken(
+    accessToken.toString(),
+  );
+
+  await SecureStorageService.saveRefreshToken(
+    refreshToken.toString(),
+  );
+
+  if (data["active_child"] != null) {
+    await SecureStorageService.saveUser({
+      ...?await SecureStorageService.getUser(),
+      "active_child": data["active_child"],
+    });
+  }
 }
+
 
 Future<FinanceSummaryModel>
 getStudentFinanceSummary(String studentId,) 
