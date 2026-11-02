@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/storage/secure_storage_service.dart';
@@ -119,17 +120,20 @@ class _LoginScreenState extends State<LoginScreen> {
           "Le contexte actif est absent de la réponse serveur.",
         );
       }
+     await SecureStorageService.saveSession(
+      accessToken: response.access!,
+      refreshToken: response.refresh!,
+      user: response.user!.toJson(),
+      schoolId: (activeContext["school_id"] ?? "").toString(),
+      schoolName: (activeContext["school_name"] ?? "École").toString(),
+      roleId: (activeContext["role_id"] ?? "").toString(),
+      roleName: (activeContext["role_name"] ?? "Utilisateur").toString(),
+      roleCode: (activeContext["role_code"] ?? response.user!.userType).toString(),
+    );
 
-      await SecureStorageService.saveSession(
-        accessToken: response.access!,
-        refreshToken: response.refresh!,
-        user: response.user!.toJson(),
-        schoolId: (activeContext["school_id"] ?? "").toString(),
-        schoolName: (activeContext["school_name"] ?? "École").toString(),
-        roleId: (activeContext["role_id"] ?? "").toString(),
-        roleName: (activeContext["role_name"] ?? "Utilisateur").toString(),
-        roleCode: (activeContext["role_code"] ?? response.user!.userType).toString(),
-      );
+    debugPrint("SESSION ENREGISTREE : ${await SecureStorageService.hasSession()}");
+    debugPrint("ROLE : ${await SecureStorageService.getUserType()}");
+
 
       await NotificationService.instance.registerDevice();
 
@@ -143,14 +147,40 @@ class _LoginScreenState extends State<LoginScreen> {
         (_) => false,
       );
       
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint("========== ERREUR LOGIN ==========");
+
+      if (e is DioException) {
+        debugPrint("TYPE : ${e.type}");
+        debugPrint("STATUS : ${e.response?.statusCode}");
+        debugPrint("DATA : ${e.response?.data}");
+        debugPrint("MESSAGE : ${e.message}");
+      } else {
+        debugPrint("ERREUR : $e");
+      }
+
+      debugPrint("STACKTRACE : $stackTrace");
+      debugPrint("==================================");
+
       if (!mounted) return;
 
+      String message = "Une erreur est survenue lors de la connexion.";
+
+      if (e is DioException) {
+        final data = e.response?.data;
+
+        if (data is Map && data["detail"] != null) {
+          message = data["detail"].toString();
+        } else if (e.response?.statusCode == 401 ||
+            e.response?.statusCode == 400) {
+          message = "Identifiants invalides.";
+        }
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Numéro ou mot de passe incorrect !",
-          ),
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red.shade700,
         ),
       );
     } finally {

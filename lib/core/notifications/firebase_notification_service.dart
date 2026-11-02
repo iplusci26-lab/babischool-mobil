@@ -250,6 +250,12 @@ Future<void> _onForegroundMessage(
         "token": token,
         "platform": platform,
         },
+        options: Options(
+        extra: {
+          ApiClient.skipAuthRedirectKey: true,
+        },
+      ),
+
     );
 
    

@@ -154,10 +154,16 @@ class _ProfileScreenState
                   children: [
 
                     /// HEADER
-                    ProfileHeader(
-                      profile: profile!,
-                      onEditAvatar: pickAvatar,
-                    ),
+                    if (profile != null)
+                      ProfileHeader(
+                        profile: profile!,
+                        onEditAvatar: pickAvatar,
+                      )
+                    else
+                      const Text(
+                        "Informations du profil indisponibles.",
+                        style: TextStyle(color: Colors.grey),
+                      ),
 
                     const SizedBox(height: 24),
 

@@ -153,6 +153,8 @@ Future<void> checkForAppUpdate() async {
 
   Future<void> initialize() async {
 
+
+
     await Future.delayed(
 
       const Duration(
@@ -176,6 +178,26 @@ Future<void> checkForAppUpdate() async {
 
     final hasSession =
         await SecureStorageService.hasSession();
+
+    
+    debugPrint("========== SESSION DEBUG ==========");
+    debugPrint("HAS SESSION : $hasSession");
+
+    final user = await SecureStorageService.getUser();
+    final role = await SecureStorageService.getUserType();
+
+    debugPrint("USER : $user");
+    debugPrint("USER TYPE : $role");
+    
+    debugPrint("SPLASH ROLE : ${await SecureStorageService.getUserType()}");
+    debugPrint("==================================");
+
+    if (!hasSession) {
+      debugPrint("REDIRECTION : SESSION ABSENTE");
+
+      navigate(const LoginScreen());
+      return;
+    }
 
     if (!hasSession) {
 
@@ -220,11 +242,13 @@ Future<void> checkForAppUpdate() async {
 
     );
 
+    /*
     final user =
         await SecureStorageService.getUser();
 
     final role =
-        await SecureStorageService.getUserType();
+        await SecureStorageService.getUserType();*/
+   
 
     if (!mounted) return;
 
@@ -243,12 +267,14 @@ Future<void> checkForAppUpdate() async {
       const Duration(
         milliseconds: 900,
       ),
+      
+
 
     );
-
-
     switch (role) {
+
   case "teacher":
+  case "enseignant":
     setState(() {
       status = "Chargement de votre espace Enseignant...";
     });

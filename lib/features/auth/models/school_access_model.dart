@@ -1,9 +1,9 @@
 
 class SchoolAccessModel {
-  final String schoolId;
+  final String? schoolId;
   final String schoolName;
   final String schoolCode;
-  final String roleId;
+  final String? roleId;
   final String roleName;
   final String roleCode;
 
@@ -11,18 +11,22 @@ class SchoolAccessModel {
     required this.schoolId,
     required this.schoolName,
     this.schoolCode = '',
-    required this.roleId,
+    this.roleId,
     required this.roleName,
     required this.roleCode,
   });
 
   factory SchoolAccessModel.fromJson(Map<String, dynamic> json) {
     return SchoolAccessModel(
-      schoolId: (json["school_id"] ?? "").toString(),
+      schoolId: json["school_id"]?.toString(),
       schoolName: (json["school_name"] ?? "École").toString(),
       schoolCode: (json["school_code"] ?? "").toString(),
-      roleId: (json["role_id"] ?? "").toString(),
-      roleName: (json["role_name"] ?? json["role_code"] ?? "Utilisateur").toString(),
+      roleId: json["role_id"]?.toString(),
+      roleName: (
+        json["role_name"] ??
+        json["role_code"] ??
+        "Utilisateur"
+      ).toString(),
       roleCode: (json["role_code"] ?? "").toString(),
     );
   }

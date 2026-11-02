@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../../../core/storage/secure_storage_service.dart';
 import '../login_screen.dart';
@@ -54,23 +55,33 @@ class AuthService {
   );
 }
 
-
 Future<LoginResponseModel> switchContext({
   required SchoolAccessModel access,
 }) async {
-  final response = await ApiClient.dio.post(
-    Endpoints.switchContext,
-    data: {
-      "school_id": access.schoolId,
-      "role_id": access.roleId,
-    },
-  );
+  final data = {
+    "school_id": access.schoolId,
+    "role_id": access.roleId,
+  };
 
-  return LoginResponseModel.fromJson(
-    Map<String, dynamic>.from(response.data),
-  );
+  try {
+    print("SWITCH CONTEXT REQUEST: $data");
+
+    final response = await ApiClient.dio.post(
+      Endpoints.switchContext,
+      data: data,
+    );
+
+    print("SWITCH CONTEXT RESPONSE: ${response.data}");
+
+    return LoginResponseModel.fromJson(
+      Map<String, dynamic>.from(response.data),
+    );
+  } on DioException catch (e) {
+    print("SWITCH CONTEXT STATUS: ${e.response?.statusCode}");
+    print("SWITCH CONTEXT ERROR: ${e.response?.data}");
+    rethrow;
+  }
 }
-
 
   //------------------------------------------------------
   // LOGOUT

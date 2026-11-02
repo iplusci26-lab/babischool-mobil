@@ -1,6 +1,8 @@
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 
 import '../../core/realtime/payment_realtime_service.dart';
 import '../../core/theme/app_colors.dart';
@@ -18,7 +20,6 @@ import '../payments/widgets/payment_history_card.dart';
 import 'payment_history_screen.dart';
 
 class PaymentsScreen extends StatefulWidget {
-
   const PaymentsScreen({
     super.key,
   });
@@ -26,17 +27,13 @@ class PaymentsScreen extends StatefulWidget {
   @override
   State<PaymentsScreen> createState() =>
       _PaymentsScreenState();
-
 }
 
-class _PaymentsScreenState
-    extends State<PaymentsScreen> {
-
-  final PaymentService service =
-      PaymentService();
+class _PaymentsScreenState extends State<PaymentsScreen> {
+  final PaymentService service = PaymentService();
 
   FinanceSummaryModel? summary;
-
+  String? selectedChildId;
   bool loading = true;
 
   StreamSubscription? _paymentSubscription;
@@ -45,214 +42,174 @@ class _PaymentsScreenState
   // Chargement
   //-------------------------------------------------------
 
-  Future<void> loadData() async {
+Future<void> loadData() async {
+  try {
+    debugPrint("========== CHARGEMENT PAIEMENTS ==========");
 
-    try {
+    final data = await service.getFinanceSummary();
 
-      final data =
-          await service.getFinanceSummary();
+    if (!mounted) return;
 
-      if (!mounted) return;
+    // Récupérer l'enfant actuellement sélectionné
+    final childId = selectedChildId ?? data.studentId;
 
-      setState(() {
+    // Construire la synthèse financière de cet enfant
+    final selectedSummary = data.forChild(childId);
 
-        summary = data;
+    debugPrint("ENFANT ACTIF : ${selectedSummary.studentName}");
+    debugPrint("ID ENFANT : ${selectedSummary.studentId}");
+    debugPrint("MONTANT PAYÉ : ${selectedSummary.amountPaid}");
+    debugPrint("SOLDE : ${selectedSummary.balance}");
+    debugPrint("NOMBRE DE PAIEMENTS : ${selectedSummary.payments.length}");
 
-        loading = false;
+    setState(() {
+      summary = selectedSummary;
+      selectedChildId = selectedSummary.studentId;
+      loading = false;
+    });
 
-      });
+  } catch (e, stackTrace) {
+    debugPrint("========== ERREUR CHARGEMENT PAIEMENTS ==========");
+    debugPrint("ERREUR : $e");
+    debugPrint("STACKTRACE : $stackTrace");
 
-    } catch (_) {
+    if (!mounted) return;
 
-      if (!mounted) return;
-
-      setState(() {
-
-        loading = false;
-
-      });
-
-    }
-
+    setState(() {
+      loading = false;
+    });
   }
-
+}
   //-------------------------------------------------------
   // Changement d'enfant
   //-------------------------------------------------------
 
- 
-Future<void> changeChild(ChildFinanceModel child) async {
-  if (!mounted) return;
+  Future<void> changeChild(
+    ChildFinanceModel child,
+  ) async {
+     if (child.id == selectedChildId) return;
+    setState(() {
+      selectedChildId = child.id;
+      loading = true;
+    });
 
-  setState(() => loading = true);
+    try {
+      await service.changeActiveChild(child.id);
+      await loadData();
+    } catch (e, stackTrace) {
+      debugPrint("========== ERREUR CHANGEMENT ENFANT ==========");
 
-  try {
-    await service.changeActiveChild(child.id);
+      if (e is DioException) {
+        debugPrint("STATUS: ${e.response?.statusCode}");
+        debugPrint("DATA: ${e.response?.data}");
+        debugPrint("URL: ${e.requestOptions.uri}");
+      } else {
+        debugPrint("ERREUR: $e");
+      }
 
-    if (!mounted) return;
+      debugPrint("STACKTRACE: $stackTrace");
+      debugPrint("==============================================");
 
-    await loadData();
-  } catch (e) {
-    debugPrint("Erreur changement enfant : $e");
+      if (!mounted) return;
 
-    if (!mounted) return;
-
-    setState(() => loading = false);
+      setState(() {
+        loading = false;
+      });
+    }
   }
-}
-
 
   //-------------------------------------------------------
   // Temps réel
   //-------------------------------------------------------
 
   void _listenRealtime() {
-
     _paymentSubscription =
-
         PaymentRealtimeService.instance.stream.listen(
-
       (_) async {
-
         debugPrint(
-
           "========== PAYMENT REALTIME ==========",
-
         );
 
         await loadData();
-
       },
-
     );
-
   }
 
   //-------------------------------------------------------
 
   @override
   void initState() {
-
     super.initState();
 
     loadData();
-
     _listenRealtime();
-
   }
 
   //-------------------------------------------------------
 
   @override
   void dispose() {
-
     _paymentSubscription?.cancel();
 
     super.dispose();
-
   }
 
   //-------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
-
     if (loading) {
-
       return const Scaffold(
-
         body: Center(
-
           child: CircularProgressIndicator(),
-
         ),
-
       );
-
     }
 
     if (summary == null) {
-
       return const Scaffold(
-
         body: Center(
-
           child: Text(
-
             "Impossible de charger les paiements",
-
           ),
-
         ),
-
       );
-
     }
 
     return Scaffold(
-
-      backgroundColor:
-          AppColors.background,
-
+      backgroundColor: AppColors.background,
       body: RefreshIndicator(
-
         onRefresh: loadData,
-
         child: ListView(
-
-          physics:
-              const AlwaysScrollableScrollPhysics(),
-
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.only(
             bottom: 30,
           ),
-
           children: [
-
             //--------------------------------------------------
             // HEADER
             //--------------------------------------------------
 
             const AppHeader(
-
               title: "Paiements",
-
-              subtitle:
-                  "Suivez la scolarité de vos enfants",
-
+              subtitle: "Suivez la scolarité de vos enfants",
             ),
 
             const SizedBox(height: 28),
 
             Padding(
-
-              padding:
-                  const EdgeInsets.symmetric(
-
+              padding: const EdgeInsets.symmetric(
                 horizontal: 22,
-
               ),
-
               child: Column(
-
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   Text(
-
                     summary!.studentName,
-
                     style: const TextStyle(
-
                       fontSize: 24,
-
-                      fontWeight:
-                          FontWeight.bold,
-
+                      fontWeight: FontWeight.bold,
                     ),
-
                   ),
 
                   const SizedBox(height: 20),
@@ -262,27 +219,15 @@ Future<void> changeChild(ChildFinanceModel child) async {
                   //--------------------------------------------------
 
                   AnimatedSwitcher(
-
-                    duration:
-                        const Duration(
-
+                    duration: const Duration(
                       milliseconds: 350,
-
                     ),
-
-                    child:
-                        FinanceSummaryCard(
-
+                    child: FinanceSummaryCard(
                       key: ValueKey(
-
                         summary!.studentId,
-
                       ),
-
                       summary: summary!,
-
                     ),
-
                   ),
 
                   const SizedBox(height: 34),
@@ -292,90 +237,49 @@ Future<void> changeChild(ChildFinanceModel child) async {
                   //--------------------------------------------------
 
                   Row(
-
                     mainAxisAlignment:
                         MainAxisAlignment.spaceBetween,
-
                     children: [
-
                       const Text(
-
                         "Mes enfants",
-
                         style: TextStyle(
-
                           fontSize: 22,
-
-                          fontWeight:
-                              FontWeight.bold,
-
+                          fontWeight: FontWeight.bold,
                         ),
-
                       ),
 
                       TextButton.icon(
-
                         onPressed: () {
-
                           ScaffoldMessenger.of(context)
-
                               .showSnackBar(
-
                             const SnackBar(
-
                               content: Text(
-
                                 "Tous vos enfants sont déjà affichés.",
-
                               ),
-
                             ),
-
                           );
-
                         },
-
                         icon: const Icon(
-
                           Icons.info_outline,
-
                           size: 15,
-
                         ),
-
                         label: const Text(
-
                           "Voir tout",
-
                         ),
-
                       ),
-
                     ],
-
                   ),
 
                   const SizedBox(height: 14),
 
                   ...summary!.children.map(
-
-                    (child) =>
-
-                        ChildPaymentCard(
-
+                    (child) => ChildPaymentCard(
                       child: child,
-
-                      activeChildId:
-                          summary!.studentId,
-
+                      activeChildId: selectedChildId  ?? summary!.studentId,
                       onTap: () {
-
                         changeChild(child);
-
                       },
-
                     ),
-
                   ),
 
                   const SizedBox(height: 30),
@@ -385,118 +289,59 @@ Future<void> changeChild(ChildFinanceModel child) async {
                   //--------------------------------------------------
 
                   Row(
-
                     mainAxisAlignment:
                         MainAxisAlignment.spaceBetween,
-
                     children: [
-
                       const Text(
-
                         "Derniers paiements",
-
                         style: TextStyle(
-
                           fontSize: 22,
-
-                          fontWeight:
-                              FontWeight.bold,
-
+                          fontWeight: FontWeight.bold,
                         ),
-
                       ),
 
-                      if (summary!
-                              .payments.length >
-                          5)
-
+                      if (summary!.payments.length > 5)
                         TextButton.icon(
-
                           onPressed: () {
-
                             Navigator.push(
-
                               context,
-
                               MaterialPageRoute(
-
                                 builder: (_) =>
-
                                     PaymentHistoryScreen(
-
-                                  payments: summary!
-                                      .payments,
-
+                                  payments: summary!.payments,
                                 ),
-
                               ),
-
                             );
-
                           },
-
                           icon: const Icon(
-
                             Icons.arrow_forward_ios,
-
                             size: 15,
-
                           ),
-
                           label: const Text(
-
                             "Voir tout",
-
                           ),
-
                         ),
-
                     ],
-
                   ),
 
                   const SizedBox(height: 16),
 
-                  ...summary!.payments
-
-                      .take(5)
-
-                      .map(
-
-                        (payment) => Padding(
-
-                          padding:
-                              const EdgeInsets.only(
-
-                            bottom: 14,
-
-                          ),
-
-                          child:
-                              PaymentHistoryCard(
-
-                            payment: payment,
-
-                          ),
-
-                        ),
-
+                  ...summary!.payments.take(5).map(
+                    (payment) => Padding(
+                      padding: const EdgeInsets.only(
+                        bottom: 14,
                       ),
-
+                      child: PaymentHistoryCard(
+                        payment: payment,
+                      ),
+                    ),
+                  ),
                 ],
-
               ),
-
             ),
-
           ],
-
         ),
-
       ),
-
     );
-
   }
-
 }

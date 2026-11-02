@@ -40,7 +40,7 @@ class _SelectContextScreenState
 
     setState(() {
       loading = true;
-      selectedAccessId = '${access.schoolId}_${access.roleId}';
+      selectedAccessId = '${access.schoolId}_${access.roleId ?? "parent"}';
     });
 
     try {
@@ -74,9 +74,9 @@ class _SelectContextScreenState
         accessToken: response.access!,
         refreshToken: response.refresh!,
         user: response.user!.toJson(),
-        schoolId: access.schoolId,
+        schoolId: access.schoolId ?? '',
         schoolName: access.schoolName,
-        roleId: access.roleId,
+        roleId: access.roleId ?? '',
         roleName: access.roleName,
         roleCode: access.roleCode,
       );
@@ -185,7 +185,7 @@ class _SelectContextScreenState
               ),
 
             ...widget.accesses.map((access) {
-              final id = '${access.schoolId}_${access.roleId}';
+              final id = '${access.schoolId}_${access.roleId ?? "parent"}';
               final isSelected = selectedAccessId == id;
 
               return Card(
