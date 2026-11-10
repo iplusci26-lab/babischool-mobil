@@ -32,7 +32,7 @@ class FirebaseNotificationService {
     //------------------------------------------------------
 
     final settings =
-        await _messaging.requestPermission(
+      await _messaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,

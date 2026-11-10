@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../features/messaging/messaging_screen.dart';
+
 import '../../../features/notifications/notification_screen.dart';
 
 import '../../../features/profile/screens/profile_screen.dart';
@@ -33,7 +35,9 @@ class _TeacherShellState
 
     TeacherScheduleScreen(),
 
-    TeacherClassroomsScreen(),
+    //TeacherClassroomsScreen(),
+
+    MessagingScreen(),
 
     NotificationScreen(),
 
@@ -121,14 +125,14 @@ class _TeacherShellState
           NavigationDestination(
 
             icon: Icon(
-              Icons.class_outlined,
+              Icons.chat_bubble_outline,
             ),
 
             selectedIcon: Icon(
-              Icons.class_,
+              Icons.chat_bubble_outline,
             ),
 
-            label: "Classes",
+            label: "Messages",
 
           ),
 

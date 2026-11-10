@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../core/storage/secure_storage_service.dart';
@@ -38,6 +39,9 @@ class _SplashScreenState
   String status =
       "Initialisation...";
 
+  StreamSubscription<InstallStatus>? _updateSubscription;
+  bool _updateFlowStarted = false;
+
   @override
   void initState() {
 
@@ -77,7 +81,6 @@ class _SplashScreenState
 
   
 Future<void> checkForAppUpdate() async {
-  // Google Play In-App Updates est réservé à Android.
   if (defaultTargetPlatform != TargetPlatform.android) {
     return;
   }
@@ -85,71 +88,81 @@ Future<void> checkForAppUpdate() async {
   try {
     final updateInfo = await InAppUpdate.checkForUpdate();
 
-    if (!mounted ||
-        updateInfo.updateAvailability !=
-            UpdateAvailability.updateAvailable) {
+    if (!mounted) return;
+
+    debugPrint('========== APP UPDATE ==========');
+    debugPrint('Availability: ${updateInfo.updateAvailability}');
+    debugPrint('Immediate allowed: ${updateInfo.immediateUpdateAllowed}');
+    debugPrint('Flexible allowed: ${updateInfo.flexibleUpdateAllowed}');
+    debugPrint('Available version: ${updateInfo.availableVersionCode}');
+    debugPrint('================================');
+
+    if (updateInfo.updateAvailability ==
+        UpdateAvailability.developerTriggeredUpdateInProgress) {
+      await InAppUpdate.performImmediateUpdate();
       return;
     }
 
-    final shouldUpdate = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Text(
-            'Mise à jour disponible',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          content: const Text(
-            'Une nouvelle version de BabiSchool est disponible. '
-            'Mettez à jour votre application pour profiter '
-            'des dernières améliorations.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop(false);
-              },
-              child: const Text('Plus tard'),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xff6214BE),
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.of(dialogContext).pop(true);
-              },
-              child: const Text('Mettre à jour'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (shouldUpdate != true || !mounted) {
+    if (updateInfo.updateAvailability !=
+        UpdateAvailability.updateAvailable) {
       return;
     }
 
-    final result = await InAppUpdate.performImmediateUpdate();
+    if (_updateFlowStarted) return;
+    _updateFlowStarted = true;
 
-    if (result == AppUpdateResult.userDeniedUpdate) {
-      debugPrint('L’utilisateur a annulé la mise à jour.');
-    } else if (result == AppUpdateResult.inAppUpdateFailed) {
-      debugPrint('La mise à jour a échoué.');
+    // PRIORITÉ : MISE À JOUR IMMÉDIATE
+    if (updateInfo.immediateUpdateAllowed) {
+      final result = await InAppUpdate.performImmediateUpdate();
+
+      if (result != AppUpdateResult.success) {
+        debugPrint('Mise à jour immédiate non terminée : $result');
+      }
+
+      return;
     }
+
+    // ALTERNATIVE : MISE À JOUR FLEXIBLE
+    if (updateInfo.flexibleUpdateAllowed) {
+      _updateSubscription ??=
+          InAppUpdate.installUpdateListener.listen((installStatus) async {
+        debugPrint('Update status: $installStatus');
+
+        if (installStatus == InstallStatus.downloaded && mounted) {
+          try {
+            debugPrint('Téléchargement terminé. Installation...');
+
+            await InAppUpdate.completeFlexibleUpdate();
+
+          } catch (e) {
+            debugPrint('Erreur installation flexible : $e');
+          }
+        }
+
+        if (installStatus == InstallStatus.failed ||
+            installStatus == InstallStatus.canceled) {
+          debugPrint('Téléchargement de la mise à jour interrompu.');
+        }
+      });
+
+      // Le téléchargement se poursuit en arrière-plan.
+      unawaited(
+        InAppUpdate.startFlexibleUpdate().then((result) {
+          debugPrint('Résultat téléchargement : $result');
+        }).catchError((e) {
+          debugPrint('Erreur téléchargement : $e');
+        }),
+      );
+    }
+
   } catch (e, stackTrace) {
-    // Une erreur de vérification ne doit pas bloquer
-    // l'accès à BabiSchool.
-    debugPrint('Vérification de mise à jour impossible : $e');
+    debugPrint('Erreur vérification mise à jour : $e');
     debugPrintStack(stackTrace: stackTrace);
   }
 }
 
-  //--------------------------------------------------
+  
+    //--------------------------------------------------
 
   Future<void> initialize() async {
 
@@ -186,7 +199,7 @@ Future<void> checkForAppUpdate() async {
     final user = await SecureStorageService.getUser();
     final role = await SecureStorageService.getUserType();
 
-    debugPrint("USER : $user");
+    debugPrint("USER--- : ${user?["user_type"]}");
     debugPrint("USER TYPE : $role");
     
     debugPrint("SPLASH ROLE : ${await SecureStorageService.getUserType()}");
@@ -271,7 +284,7 @@ Future<void> checkForAppUpdate() async {
 
 
     );
-    switch (role) {
+    switch (role?.trim().toLowerCase()) {
 
   case "teacher":
   case "enseignant":
@@ -286,6 +299,10 @@ Future<void> checkForAppUpdate() async {
 
   case "admin":
   case "staff":
+  case "director":
+  case "educateur":
+  case "censeur":
+  case "econome":
     setState(() {
       status = "Chargement de votre espace Administratif...";
     });
@@ -344,7 +361,8 @@ Future<void> checkForAppUpdate() async {
 
   @override
   void dispose() {
-
+    
+     _updateSubscription?.cancel();
     _controller.dispose();
 
     super.dispose();

@@ -18,6 +18,127 @@ class HomeworkCard extends StatelessWidget {
 
   });
 
+  
+Widget _buildGradeSection() {
+  if (homework.hasScore) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.green.shade100,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.verified,
+                color: Colors.green.shade700,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                "Note publiée",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                homework.score!.toStringAsFixed(
+                  homework.score! % 1 == 0 ? 0 : 2,
+                ),
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green.shade800,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 5),
+                child: Text(
+                  "/ ${homework.maxScore.toStringAsFixed(
+                    homework.maxScore % 1 == 0 ? 0 : 2,
+                  )}",
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (homework.gradePublishedAt != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              "Publiée le ${_formatPublicationDate(homework.gradePublishedAt!)}",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  if (!homework.isGradePublished &&
+      homework.isSubmitted) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade50,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.schedule,
+            color: Colors.orange.shade800,
+          ),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text(
+              "Travail remis – note en attente de publication",
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  return const SizedBox.shrink();
+}
+
+String _formatPublicationDate(String value) {
+  final date = DateTime.tryParse(value);
+  if (date == null) return value;
+
+  final localDate = date.toLocal();
+
+  final day = localDate.day.toString().padLeft(2, '0');
+  final month = localDate.month.toString().padLeft(2, '0');
+  final year = localDate.year;
+
+  return "$day/$month/$year";
+}
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -323,6 +444,14 @@ class HomeworkCard extends StatelessWidget {
 
                   const SizedBox(height: 18),
 
+                ],
+
+                
+                if (homework.isGradePublished ||
+                    homework.isSubmitted) ...[
+                  const SizedBox(height: 18),
+                  _buildGradeSection(),
+                  const SizedBox(height: 18),
                 ],
 
                 //------------------------------------------------

@@ -1,67 +1,106 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../core/storage/secure_storage_service.dart';
-
 import '../../core/api/ws_endpoints.dart';
 
 class NotificationWebSocketService {
-
   WebSocketChannel? channel;
 
+  StreamSubscription<dynamic>? _subscription;
+
+  bool get isConnected => channel != null;
+
   Future<void> connect({
-
-    required Function(
-      Map<String,dynamic>
-    ) onNotification,
-
+    required Function(Map<String, dynamic>) onNotification,
   }) async {
+    await disconnect();
 
-    final token =
+    try {
+      final token = await SecureStorageService.getAccessToken();
 
-    await SecureStorageService
-    .getAccessToken();
+      if (token == null || token.trim().isEmpty) {
+        debugPrint('NOTIFICATION WS ERROR: JWT TOKEN NOT FOUND');
+        return;
+      }
 
-    channel =
+      final uri = Uri.parse(WsEndpoints.notifications).replace(
+        queryParameters: {
+          'token': token,
+        },
+      );
 
-    WebSocketChannel.connect(
+      debugPrint('========== NOTIFICATION WS ==========');
+      debugPrint(
+        'CONNECTING TO: ${uri.replace(queryParameters: {'token': '***'})}',
+      );
 
-      Uri.parse(
+      final newChannel = WebSocketChannel.connect(uri);
 
-        "${WsEndpoints.notifications}?token=$token"
-      ),
-    );
+      channel = newChannel;
 
-    channel!.stream.listen(
+      _subscription = newChannel.stream.listen(
+        (event) {
+          debugPrint('NOTIFICATION WS RAW: $event');
 
-      (event) {
+          try {
+            final decoded = jsonDecode(event.toString());
 
-        final data =
+            if (decoded is! Map) {
+              debugPrint('NOTIFICATION WS: INVALID EVENT FORMAT');
+              return;
+            }
 
-        jsonDecode(event);
+            final data = Map<String, dynamic>.from(decoded);
 
-        onNotification(data);
-      },
+            debugPrint('NOTIFICATION WS EVENT: $data');
 
-      onError: (e) {
+            onNotification(data);
+          } catch (e) {
+            debugPrint('NOTIFICATION WS JSON ERROR: $e');
+          }
+        },
+        onError: (error) {
+          debugPrint('NOTIFICATION WS ERROR: $error');
+        },
+        onDone: () {
+          debugPrint('NOTIFICATION WS CLOSED');
+          debugPrint('CODE: ${newChannel.closeCode}');
+          debugPrint('REASON: ${newChannel.closeReason}');
 
-        print(
-          "NOTIFICATION WS ERROR $e",
-        );
-      },
+          if (identical(channel, newChannel)) {
+            channel = null;
+            _subscription = null;
+          }
+        },
+      );
 
-      onDone: () {
+      await newChannel.ready;
 
-        print(
-          "NOTIFICATION WS CLOSED",
-        );
-      },
-    );
+      debugPrint('NOTIFICATION WS CONNECTED SUCCESSFULLY');
+    } catch (e, stackTrace) {
+      debugPrint('NOTIFICATION WS CONNECTION ERROR: $e');
+      debugPrint(stackTrace.toString());
+
+      await disconnect();
+    }
   }
 
-  void disconnect() {
+  Future<void> disconnect() async {
+    debugPrint('NOTIFICATION WS DISCONNECTING');
 
-    channel?.sink.close();
+    final subscription = _subscription;
+    final currentChannel = channel;
+
+    _subscription = null;
+    channel = null;
+
+    await subscription?.cancel();
+    await currentChannel?.sink.close();
+
+    debugPrint('NOTIFICATION WS DISCONNECTED');
   }
 }

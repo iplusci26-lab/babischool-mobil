@@ -177,19 +177,25 @@ Future<void> loadConversation() async {
         return;
       }
 
-      if (!mounted) {
+      if (!mounted || conversation == null) {
+          return;
+        }
 
-        return;
-      }
+        setState(() {
+          final exists = conversation!.messages.any(
+            (m) => m.id == message.id,
+          );
 
-      setState(() {
+          if (!exists) {
+            conversation!.messages.add(message);
 
-        conversation!
-            .messages
-            .add(message);
-      });
+            conversation!.messages.sort(
+              (a, b) => a.createdAt.compareTo(b.createdAt),
+            );
+          }
+        });
 
-      scrollToBottom();
+        scrollToBottom();
     },
   );
 }
@@ -341,61 +347,73 @@ Future<void> pickDocument() async {
 
 }
 
-  Future<void> sendMessage() async {
 
-    if (
 
-        messageController.text.trim().isEmpty &&
+Future<void> sendMessage() async {
+  final body = messageController.text.trim();
+  final selectedAttachment = attachment;
 
-        attachment == null
+  if (body.isEmpty && selectedAttachment == null) {
+    return;
+  }
 
-    ) {
+  if (sending) return;
 
-        return;
+  try {
+    setState(() {
+      sending = true;
+    });
 
-    }
+    final response = await messagingService.sendMessage(
+      conversationId: widget.conversationId,
+      body: body,
+      attachment: selectedAttachment,
+    );
 
-    try {
+    final newMessage = MessageModel.fromJson(response);
 
-        setState(() {
+    if (!mounted) return;
 
-            sending = true;
+    setState(() {
+      final exists = conversation!.messages.any(
+        (message) => message.id == newMessage.id,
+      );
 
-        });
+      if (!exists) {
+        conversation!.messages.add(newMessage);
 
-        await messagingService.sendMessage(
-
-            conversationId: widget.conversationId,
-
-            body: messageController.text.trim(),
-
-            attachment: attachment,
-
+        conversation!.messages.sort(
+          (a, b) => a.createdAt.compareTo(b.createdAt),
         );
+      }
 
-        messageController.clear();
+      messageController.clear();
+      attachment = null;
+    });
 
-        setState(() {
+    scrollToBottom();
 
-            attachment = null;
+  } catch (e) {
+    debugPrint("Erreur envoi message : $e");
 
-        });
+    if (!mounted) return;
 
-    } finally {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Échec de l'envoi du message."),
+        backgroundColor: Colors.red,
+      ),
+    );
 
-        if (mounted) {
-
-            setState(() {
-
-                sending = false;
-
-            });
-
-        }
-
+  } finally {
+    if (mounted) {
+      setState(() {
+        sending = false;
+      });
     }
-
+  }
 }
+
 
   void removeAttachment() {
 

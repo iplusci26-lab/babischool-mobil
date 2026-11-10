@@ -120,6 +120,12 @@ class _LoginScreenState extends State<LoginScreen> {
           "Le contexte actif est absent de la réponse serveur.",
         );
       }
+      debugPrint("========== STAFF LOGIN DEBUG ==========");
+debugPrint("USER JSON: ${response.user!.toJson()}");
+debugPrint("USER TYPE: ${response.user!.userType}");
+debugPrint("ACTIVE CONTEXT: $activeContext");
+debugPrint("ROLE CODE: ${activeContext["role_code"]}");
+debugPrint("=======================================");
      await SecureStorageService.saveSession(
       accessToken: response.access!,
       refreshToken: response.refresh!,
@@ -128,9 +134,14 @@ class _LoginScreenState extends State<LoginScreen> {
       schoolName: (activeContext["school_name"] ?? "École").toString(),
       roleId: (activeContext["role_id"] ?? "").toString(),
       roleName: (activeContext["role_name"] ?? "Utilisateur").toString(),
-      roleCode: (activeContext["role_code"] ?? response.user!.userType).toString(),
+      roleCode: response.user!.userType,
+      //roleCode: (activeContext["role_code"] ?? response.user!.userType).toString(),
     );
-
+  debugPrint("========== SAVED SESSION DEBUG ==========");
+debugPrint("USER TYPE: ${await SecureStorageService.getUserType()}");
+debugPrint("ACTIVE ROLE: ${await SecureStorageService.getActiveRoleCode()}");
+debugPrint("HAS SESSION: ${await SecureStorageService.hasSession()}");
+debugPrint("=========================================");
     debugPrint("SESSION ENREGISTREE : ${await SecureStorageService.hasSession()}");
     debugPrint("ROLE : ${await SecureStorageService.getUserType()}");
 
