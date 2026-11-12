@@ -3,11 +3,11 @@ class WsEndpoints {
   static const String wsBase =
       String.fromEnvironment(
         "WS_BASE_URL",
-        defaultValue: "ws://localhost:8000",
+        //defaultValue: "ws://localhost:8000",
         //defaultValue:"ws://127.0.0.1:8000",
         //defaultValue:"wss://iplus-api.onrender.com",
         //"ws://192.168.100.21:8000",
-        //"wss://iplus-api.onrender.com",
+        "wss://iplus-api.onrender.com",
         
       
         
