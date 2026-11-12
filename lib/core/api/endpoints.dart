@@ -1,6 +1,6 @@
 class Endpoints {
 
-  //static const baseUrl = "https://iplus-api.onrender.com/api/v1";
+  ///static const baseUrl = "https://iplus-api.onrender.com/api/v1";
   //static const baseUrl = "http://192.168.100.21:8000/api/v1";
   //"http://192.168.100.21:8000/api/v1";
   static const baseUrl = "http://127.0.0.1:8000/api/v1";
